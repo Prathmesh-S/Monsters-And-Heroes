@@ -24,7 +24,7 @@ public class GameController {
         int numberOfPlayers = getPlayerCount(scanner);
         List<Player> players = getPlayerNames(numberOfPlayers, scanner);
         this.players = players;
-        this.GAME_LIST = new BoardGame[]{new MonstersAndHeroes(players)};
+        this.GAME_LIST = new BoardGame[]{new MonstersAndHeroes(players), new LegendsOfValor(players)};
 
         while (!endAllGames) {
             BoardGame currentGame = chooseGame();
@@ -65,6 +65,9 @@ public class GameController {
                 if (gameIndex == 0) {
                     validateSinglePlayerGame();
                     currentGame = new MonstersAndHeroes(players);
+                } else if (gameIndex == 1) {
+                    validateSinglePlayerGame();
+                    currentGame = new LegendsOfValor(players);
                 }
                 break;
 

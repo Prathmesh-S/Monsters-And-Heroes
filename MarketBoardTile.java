@@ -96,19 +96,19 @@ public class MarketBoardTile extends BoardPiece {
 
         if (userResponse) {
             while (true) {
-                if (hero.getInventory().isEmpty()) {
+                if (hero.getInventoryObject().getInventory().isEmpty()) {
                     System.out.println("\nNo more items to sell!\n");
                     break;
                 }
-                int chosenIndex = getIndexResponse(monstersAndHeroesPlayer, 0, hero.getInventory().size() - 1,
+                int chosenIndex = getIndexResponse(monstersAndHeroesPlayer, 0, hero.getInventoryObject().getInventory().size() - 1,
                         "\nPlease select the index of an item from the table to sell it or type -1 to stop or -2 for hero information.\n", "Incorrect Index Chosen!");
                 //User is done buying items for the hero.
                 if (chosenIndex == -1) {
                     break;
                 }
                 //At this point, a hero has picked something to sell.
-                Item chosenItem = hero.getInventory().get(chosenIndex);
-                hero.getInventory().remove(chosenIndex);
+                Item chosenItem = hero.getInventoryObject().getInventory().get(chosenIndex);
+                hero.getInventoryObject().getInventory().remove(chosenIndex);
                 marketItems.add(chosenItem);
                 hero.addGold((int) chosenItem.getPrice() / 2);
 

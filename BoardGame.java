@@ -18,10 +18,6 @@ public abstract class BoardGame {
         this.scanner = ScannerSingleton.getInstance();
     }
 
-    public String printStatus() {
-        return this.printBoard();
-    }
-
     //Responsible for getting the board size of the game.
     public static int getNumberResponse(int min, int max, String intro, String tooLow, String tooHigh, String tryAgain) {
         Scanner scanner = ScannerSingleton.getInstance();
@@ -76,24 +72,6 @@ public abstract class BoardGame {
             }
         }
     }
-
-    //Create and return a string representing our 2D board and its state
-    public String printBoard() {
-
-        StringBuilder sb = new StringBuilder();
-        sb.append("\n");
-        for (int i = 0; i < board.length; i++) {
-            sb = printRow(i, sb);
-            if (i < board.length - 1) {
-                sb.append("\n");
-            }
-        }
-
-        return sb.toString();
-    }
-
-    //Print a specific row of a BoardGame
-    public abstract StringBuilder printRow(int i, StringBuilder sb);
 
     //Checks to see if a user-inputted ID for a board piece is taken!
     public BoardPiece getValidBoxID() {

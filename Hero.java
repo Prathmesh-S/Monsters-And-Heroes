@@ -14,7 +14,8 @@ public abstract class Hero  {
     private double dexterity;
     private double agility;
     private int gold;
-    private List<Item> inventory;
+    //private List<Item> inventory;
+    private final Inventory inventory = new Inventory();
     private String heroType;
     private Weapon leftHand = null;
     private Weapon rightHand = null;
@@ -81,11 +82,7 @@ public abstract class Hero  {
         this.maxMana = maxMana;
     }
 
-    public void setInventory(List<Item> inventory) {
-        this.inventory = inventory;
-    }
-
-    public List<Item> getInventory() {
+    public Inventory getInventoryObject() {
         return inventory;
     }
 
@@ -146,11 +143,11 @@ public abstract class Hero  {
     }
 
     public void addItemToInventory(Item item) {
-        this.inventory.add(item);
+        this.inventory.addItemToInventory(item);
     }
 
     public void removeItemFromInventory(Item item) {
-        this.inventory.remove(item);
+        this.inventory.removeItemFromInventory(item);
     }
 
     public void subtractGold(double gold) {
@@ -167,7 +164,7 @@ public abstract class Hero  {
 
     public List<Item> getItemsByType(Class<?> itemType) {
         List<Item> items = new ArrayList<>();
-        for (Item item : inventory) {
+        for (Item item : inventory.getInventory()) {
             if (itemType.isInstance(item)) {
                 items.add(item);
             }
@@ -221,31 +218,31 @@ public abstract class Hero  {
 
     public void equipLeftHandedWeapon(Weapon newWeapon) {
         if (this.leftHand != null && this.leftHand.equals(this.rightHand)) {
-            inventory.add(this.leftHand);
+            inventory.getInventory().add(this.leftHand);
             this.rightHand = null;
         } else if (this.leftHand != null) {
-            inventory.add(this.leftHand);
+            inventory.getInventory().add(this.leftHand);
         }
-        inventory.remove(newWeapon);
+        inventory.getInventory().remove(newWeapon);
         this.leftHand = newWeapon;
     }
 
     public void equipRightHandedWeapon(Weapon newWeapon) {
         if (this.rightHand != null && this.leftHand.equals(this.rightHand)) {
-            inventory.add(this.rightHand);
+            inventory.getInventory().add(this.rightHand);
             this.leftHand = null;
         } else if (this.rightHand != null) {
-            inventory.add(this.rightHand);
+            inventory.getInventory().add(this.rightHand);
         }
-        inventory.remove(newWeapon);
+        inventory.getInventory().remove(newWeapon);
         this.rightHand = newWeapon;
     }
 
     public void equipTwoHandedWeapon(Weapon newWeapon) {
-        if (this.leftHand != null) inventory.add(this.leftHand);
-        if (this.rightHand != null && this.rightHand != this.leftHand) inventory.add(this.rightHand);
+        if (this.leftHand != null) inventory.getInventory().add(this.leftHand);
+        if (this.rightHand != null && this.rightHand != this.leftHand)  inventory.getInventory().add(this.rightHand);
 
-        inventory.remove(newWeapon);
+        inventory.getInventory().remove(newWeapon);
         this.leftHand = newWeapon;
         this.rightHand = newWeapon;
     }
@@ -254,7 +251,7 @@ public abstract class Hero  {
     public void dequipLeftHandedWeapon() {
         if (this.leftHand != null && (this.leftHand.isUsable())) {
             if (this.leftHand.equals(this.rightHand)) this.rightHand = null;
-            inventory.add(this.leftHand);
+            inventory.getInventory().add(this.leftHand);
             this.leftHand = null;
         } else if (this.leftHand != null && !(this.leftHand.isUsable())) {
             this.leftHand = null;
@@ -264,7 +261,7 @@ public abstract class Hero  {
     public void dequipRightHandedWeapon() {
         if (this.rightHand != null && (this.rightHand.isUsable())) {
             if (this.rightHand.equals(this.leftHand)) this.leftHand = null;
-            inventory.add(this.rightHand);
+            inventory.getInventory().add(this.rightHand);
             this.rightHand = null;
         } else if (this.rightHand != null && !(this.rightHand.isUsable())) {
             this.rightHand = null;
@@ -273,7 +270,7 @@ public abstract class Hero  {
 
     public void dequipTwoHandedWeapon() {
         if (this.leftHand != null && (this.leftHand.isUsable())) {
-            inventory.add(this.leftHand);
+            inventory.getInventory().add(this.leftHand);
             this.leftHand = null;
             this.rightHand = null;
         } else if (this.leftHand != null && !(this.leftHand.isUsable())) {

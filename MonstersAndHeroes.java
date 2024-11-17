@@ -29,9 +29,13 @@ public class MonstersAndHeroes extends BoardGame {
         numHeroes = getNumberResponse(1, 3, "number of heroes you would like to play with",
                 "The number of heroes must be ", "The number of heroes must be ", "Please enter a valid hero amount");
 
+        //Allow the user to choose their heroes they want!
+        List<Hero> randomGeneratedHeroes = new HeroFactoryManager(numHeroes * 2).getHeroes();
+        List<Hero> chosenHeroList = chooseHeroes(randomGeneratedHeroes, numHeroes);
+
         //Create our Specific Player/Heroes and place on the map
         Player generalPlayer = getPlayers().get(0);
-        monstersAndHeroesPlayer = new MonstersAndHeroesPlayer(generalPlayer.getName(), numHeroes);
+        monstersAndHeroesPlayer = new MonstersAndHeroesPlayer(generalPlayer.getName(),chosenHeroList);
         monstersAndHeroesPlayer.setCurrentBoxID(1);
         GamePiece monstersAndHeroesPlayerGamePiece = new GamePiece("YOU", "\u001B[92m");
         monstersAndHeroesTeam = new Team(monstersAndHeroesPlayer.getName(), Arrays.asList(monstersAndHeroesPlayerGamePiece));
@@ -78,8 +82,24 @@ public class MonstersAndHeroes extends BoardGame {
         }
     }
 
+    //Create and return a string representing our 2D board and its state
+    public String printBoard() {
+
+        BoardPiece [][] board = getBoard();
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("\n");
+        for (int i = 0; i < board.length; i++) {
+            sb = printRow(i, sb);
+            if (i < board.length - 1) {
+                sb.append("\n");
+            }
+        }
+
+        return sb.toString();
+    }
+
     //Print a specific row of a BoardGame
-    @Override
     public StringBuilder printRow(int i, StringBuilder sb) {
 
         BoardPiece[][] board = getBoard();
@@ -240,6 +260,28 @@ public class MonstersAndHeroes extends BoardGame {
 
         }
     }
+
+    //Allow the user to choose their selected heroes.
+    public List<Hero> chooseHeroes(List<Hero> heroes, int numHeroes) {
+        List<Hero> newHeroes = new ArrayList<>();
+
+        while (numHeroes > 0) {
+            System.out.println("\nThis is the remaining list of your possible heroes!");
+            HeroFactoryManager.displayHeroesInTableFormat(heroes);
+            System.out.println("\nYou must select " +numHeroes + " more heroes. Please choose the index of the next hero you would like to select!");
+            int chosenIndex = BoardGame.getNumberResponse(0, heroes.size() -1, "chosen index of your next hero", "Your index must be ",
+                    "Your index must be ", "Incorrect hero index chosen!");
+            newHeroes.add(heroes.get(chosenIndex));
+            heroes.remove(chosenIndex);
+            numHeroes--;
+            System.out.println("\nYou have chosen a hero. ");
+        }
+        System.out.println("\nAll of your heroes have been selected! They are below:");
+        HeroFactoryManager.displayHeroesInTableFormat(newHeroes);
+
+        return newHeroes;
+    }
+
 
     public String gameExplained() {
         return "\nWelcome to Legends: Monsters and Heroes! The game board is a square grid of three types of tiles: common spaces, market tiles, and inaccessible spaces.\n" +

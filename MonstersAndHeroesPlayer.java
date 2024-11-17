@@ -6,10 +6,9 @@ import java.util.List;
 public class MonstersAndHeroesPlayer extends Player {
     int currentBoxID;
     List<Hero> heroes = new ArrayList<Hero>();
-    public MonstersAndHeroesPlayer(String name, int numHeroes) {
+    public MonstersAndHeroesPlayer(String name, List<Hero> heroes) {
         super(name);
-        HeroFactoryManager heroFactory = new HeroFactoryManager(numHeroes);
-        heroes = heroFactory.getHeroes();
+        this.heroes = heroes;
     }
 
     public int getCurrentBoxID() {

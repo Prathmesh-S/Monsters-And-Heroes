@@ -100,6 +100,10 @@
 
 **WeaponFactory.java**: Concrete Factory creating a Weapon
 
+**Inventory.java**: A class to represent an inventory of a given hero which contains objects of type item. 
+
+**Legends of Valor**: The main class that starts a Legends of Valor Game, managing gameplay elements and interactions between Heroes and Monsters within the game.
+
 ## Notes (Design Decisions/Cool Features!)
 ---------------------------------------------------------------------------
 

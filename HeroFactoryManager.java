@@ -21,7 +21,7 @@ public class HeroFactoryManager {
             if (!heroes.contains(newHero)) {
                 heroes.add(newHero);
                 ItemFactoryManager itemFactory = new ItemFactoryManager(3);
-                newHero.setInventory(itemFactory.getItems());
+                newHero.getInventoryObject().setInventory(itemFactory.getItems());
                 if (randomNumber == 0) {
                     newHero.setHeroType("Paladin");
                 }
@@ -35,8 +35,6 @@ public class HeroFactoryManager {
                 i = i -1;
             }
         }
-
-        displayHeroesInTableFormat(heroes);
     }
 
     public List<Hero> getHeroes() {
@@ -46,8 +44,10 @@ public class HeroFactoryManager {
     public static void displayHeroesInTableFormat(List<Hero> heroes) {
         System.out.println("\033[0;32m**********************************************************************Hero Information" +
                 "*********************************************************************\033[0m");
-        System.out.printf("%-10s %-20s %-10s %-10s %-20s %-10s %-10s %-10s %-10s %-5s %-10s %-10s %-12s%n",
-                "Type", "Name", "HP", "Level", "Experience Points", "Mana", "Strength", "Agility", "Dexterity", "Gold", "Left Hand", "Right Hand", "Armour");
+        System.out.printf("%-10s %-10s %-20s %-10s %-10s %-20s %-10s %-10s %-10s %-10s %-5s %-10s %-10s %-12s%n",
+                "Index", "Type", "Name", "HP", "Level", "Experience Points", "Mana", "Strength", "Agility", "Dexterity", "Gold", "Left Hand", "Right Hand", "Armour");
+
+        int index = 0;
 
         for (Hero hero : heroes) {
             String name = hero.getName();
@@ -65,8 +65,10 @@ public class HeroFactoryManager {
             String armor= (hero.getArmor() != null) ? hero.getArmor().toString() : "";
 
 
-            System.out.printf("%-10s %-20s %-10d %-10d %-20d %-10d %-10d %-10d %-10d %-5s %-10s %-10s %-12s%n",
-                    type, name, hp, level, experience, mana, strength, agility, dexterity, gold, leftHand, rightHand, armor);
+            System.out.printf("%-10s %-10s %-20s %-10d %-10d %-20d %-10d %-10d %-10d %-10d %-5s %-10s %-10s %-12s%n",
+                    index, type, name, hp, level, experience, mana, strength, agility, dexterity, gold, leftHand, rightHand, armor);
+
+            index = index + 1;
         }
 
         System.out.println("\033[0;32m******************************************************************************************" +
@@ -76,7 +78,7 @@ public class HeroFactoryManager {
             System.out.printf("\nInventory of " + hero.getName() + ":\n");
             System.out.println("\033[0;35m**********************************************************************Item Information" +
                     "******************************************************************************************\033[0m");
-            ItemFactoryManager.displayItemsInTableFormat(hero.getInventory());
+            ItemFactoryManager.displayItemsInTableFormat(hero.getInventoryObject().getInventory());
         }
     }
 
