@@ -1,7 +1,8 @@
 //A factory class responsible for creating instances of Warrior.
 public class Warrior extends Hero {
-    public Warrior(String name, int level, int experiencePoints, int mp, int hp, int strength, int dexterity, int agility, int gold) {
-        super(name, level, experiencePoints, mp, hp, strength, dexterity, agility, gold);
+    public Warrior(String name, int level, int experiencePoints, int mp, int hp, int strength, int dexterity,
+            int agility, double baseDefense, int gold) {
+        super(name, level, experiencePoints, mp, hp, strength, dexterity, agility, baseDefense, gold);
     }
 
     @Override

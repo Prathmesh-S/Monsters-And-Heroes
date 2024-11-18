@@ -6,17 +6,19 @@ public class BoardPiece {
 
     private List<GamePiece> gamePieces;
     private boolean isAccessible;
-    //ID will be used to number each piece
+    // ID will be used to number each piece
     private int ID;
     private boolean isLabled;
-    private String label ;
+    private String label;
     private String colorCode;
+    private BoardPieceType type;// New field: Unit type
 
     public BoardPiece() {
         this.gamePieces = new ArrayList<GamePiece>();
         isAccessible = true;
         isLabled = false;
         colorCode = "\u001B[37m";
+        this.type = BoardPieceType.PLAIN;
     }
 
     public void addGamePiece(GamePiece gamePiece) {
@@ -70,4 +72,40 @@ public class BoardPiece {
     public boolean isLabled() {
         return isLabled;
     }
+
+    public BoardPieceType getType() {
+        return this.type;
+    }
+
+    public void setType(BoardPieceType type) {
+        this.type = type;
+        switch (type) {
+            case INACCESSIBLE:
+                this.isAccessible = false;
+                this.label = "I";
+                break;
+            case NEXUS:
+                this.label = "N";
+                break;
+            case BUSH:
+                this.label = "B";
+                break;
+            case CAVE:
+                this.label = "C";
+                break;
+            case KOULOU:
+                this.label = "K";
+                break;
+            case OBSTACLE:
+                this.label = "O";
+                this.isAccessible = false;
+                break;
+            default:
+                this.label = "P";
+                break;
+        }
+    }
+
+    // TODO:When initializing the map, a type can be randomly assigned to each
+    // unit.
 }

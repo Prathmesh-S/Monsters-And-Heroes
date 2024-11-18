@@ -2,7 +2,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 //This class is responsible for helping creat any Hero for our HeroesAndMonsters Game through subclasses.
-public abstract class Hero  {
+public abstract class Hero {
     private String name;
     private int level;
     private int experiencePoints;
@@ -10,18 +10,24 @@ public abstract class Hero  {
     private int maxHP;
     private int maxMana;
     private int MP;
+    private double baseDefense;
     private double strength;
     private double dexterity;
     private double agility;
     private int gold;
-    //private List<Item> inventory;
+    // private List<Item> inventory;
     private final Inventory inventory = new Inventory();
     private String heroType;
     private Weapon leftHand = null;
     private Weapon rightHand = null;
     private Armor armor = null;
+    private int currentX; // X-coordinate on the grid
+    private int currentY; // Y-coordinate on the grid
+    private String terrainType;
 
-    public Hero(String name, int level, int experiencePoints, int mp, int hp, int strength, int dexterity, int agility, int gold) {
+    public Hero(String name, int level, int experiencePoints, int mp, int hp, int strength, int dexterity, int agility,
+            double baseDefense,
+            int gold) {
         this.name = name;
         this.level = level;
         this.experiencePoints = experiencePoints;
@@ -33,6 +39,109 @@ public abstract class Hero  {
         this.dexterity = dexterity;
         this.agility = agility;
         this.gold = gold;
+        this.baseDefense = baseDefense;
+    }
+
+    public void applyTerrainBonus() {
+        if ("Bush".equals(terrainType)) {
+            this.dexterity *= 1.1;
+        } else if ("Cave".equals(terrainType)) {
+            this.agility *= 1.1;
+        } else if ("Koulou".equals(terrainType)) {
+            this.strength *= 1.1;
+        }
+    }
+
+    // Method to reset terrain bonuses
+    public void resetTerrainBonus() {
+        if ("Bush".equals(terrainType)) {
+            this.dexterity /= 1.1;
+        } else if ("Cave".equals(terrainType)) {
+            this.agility /= 1.1;
+        } else if ("Koulou".equals(terrainType)) {
+            this.strength /= 1.1;
+        }
+    }
+
+    // Movement method with validation
+    public boolean move(int newX, int newY, String[][] gameGrid) {
+        // Check if the move is valid
+        if (gameGrid[newX][newY].equals("Inaccessible") || gameGrid[newX][newY].equals("Obstacle")) {
+            System.out.println("Move not allowed.");
+            return false;
+        }
+        // Update position
+        this.currentX = newX;
+        this.currentY = newY;
+        this.terrainType = gameGrid[newX][newY]; // Update terrain
+        applyTerrainBonus();
+        return true;
+    }
+
+    // Teleport action
+    public boolean teleport(Hero targetHero, String[][] gameGrid) {
+        int targetX = targetHero.currentX;
+        int targetY = targetHero.currentY;
+
+        // Check for valid teleportation
+        if (Math.abs(targetX - this.currentX) <= 1 && Math.abs(targetY - this.currentY) <= 1) {
+            this.currentX = targetX;
+            this.currentY = targetY;
+            this.terrainType = gameGrid[targetX][targetY];
+            applyTerrainBonus();
+            return true;
+        }
+        System.out.println("Teleport not allowed.");
+        return false;
+    }
+
+    // Recall action
+    public void recall(int nexusX, int nexusY) {
+        resetTerrainBonus(); // Remove current terrain effects
+        this.currentX = nexusX;
+        this.currentY = nexusY;
+        System.out.println(name + " has recalled to the Nexus.");
+    }
+
+    // End-of-round recovery
+    public void endOfRoundRecovery() {
+        this.HP = Math.min(maxHP, (int) (this.HP * 1.1));
+        this.MP = Math.min(maxMana, (int) (this.MP * 1.1));
+        System.out.println(name + " has recovered HP and MP.");
+    }
+
+    // Respawn after death
+    public void respawn(int nexusX, int nexusY) {
+        this.HP = maxHP;
+        this.MP = maxMana;
+        this.currentX = nexusX;
+        this.currentY = nexusY;
+        System.out.println(name + " has respawned at the Nexus.");
+    }
+
+    // Getters and setters for new attributes
+    public int getCurrentX() {
+        return currentX;
+    }
+
+    public void setCurrentX(int currentX) {
+        this.currentX = currentX;
+    }
+
+    public int getCurrentY() {
+        return currentY;
+    }
+
+    public void setCurrentY(int currentY) {
+        this.currentY = currentY;
+    }
+
+    public String getTerrainType() {
+        return terrainType;
+    }
+
+    public void setTerrainType(String terrainType) {
+        this.terrainType = terrainType;
     }
 
     public void levelUp() {
@@ -41,7 +150,8 @@ public abstract class Hero  {
             int remainder = experiencePoints % 10;
             level += additionalLevels;
             experiencePoints = remainder;
-            System.out.println(name + " has leveled up " + additionalLevels + " times due to winning the battle and have gained boosted stats!");
+            System.out.println(name + " has leveled up " + additionalLevels
+                    + " times due to winning the battle and have gained boosted stats!");
 
             double skillIncrease = 0.05 * (additionalLevels) + 1;
             maxHP = (int) (maxHP * skillIncrease);
@@ -142,6 +252,34 @@ public abstract class Hero  {
         return heroType;
     }
 
+    public double getBaseDefense() {
+        return baseDefense;
+    }
+
+    public void setBaseDefense(double baseDefense) {
+        this.baseDefense = baseDefense;
+    }
+
+    public double getDefense() {
+        // Calculate total defense including armor
+        double totalDefense = baseDefense;
+        if (armor != null) {
+            totalDefense += armor.getDamageReductionValue();
+        }
+        return totalDefense;
+    }
+
+    public void takeDamage(double damage) {
+        this.HP -= damage;
+        if (this.HP < 0) {
+            this.HP = 0; // Ensure HP doesn't go negative
+        }
+    }
+
+    public boolean isAlive() {
+        return this.HP > 0;
+    }
+
     public void addItemToInventory(Item item) {
         this.inventory.addItemToInventory(item);
     }
@@ -239,18 +377,20 @@ public abstract class Hero  {
     }
 
     public void equipTwoHandedWeapon(Weapon newWeapon) {
-        if (this.leftHand != null) inventory.getInventory().add(this.leftHand);
-        if (this.rightHand != null && this.rightHand != this.leftHand)  inventory.getInventory().add(this.rightHand);
+        if (this.leftHand != null)
+            inventory.getInventory().add(this.leftHand);
+        if (this.rightHand != null && this.rightHand != this.leftHand)
+            inventory.getInventory().add(this.rightHand);
 
         inventory.getInventory().remove(newWeapon);
         this.leftHand = newWeapon;
         this.rightHand = newWeapon;
     }
 
-
     public void dequipLeftHandedWeapon() {
         if (this.leftHand != null && (this.leftHand.isUsable())) {
-            if (this.leftHand.equals(this.rightHand)) this.rightHand = null;
+            if (this.leftHand.equals(this.rightHand))
+                this.rightHand = null;
             inventory.getInventory().add(this.leftHand);
             this.leftHand = null;
         } else if (this.leftHand != null && !(this.leftHand.isUsable())) {
@@ -260,7 +400,8 @@ public abstract class Hero  {
 
     public void dequipRightHandedWeapon() {
         if (this.rightHand != null && (this.rightHand.isUsable())) {
-            if (this.rightHand.equals(this.leftHand)) this.leftHand = null;
+            if (this.rightHand.equals(this.leftHand))
+                this.leftHand = null;
             inventory.getInventory().add(this.rightHand);
             this.rightHand = null;
         } else if (this.rightHand != null && !(this.rightHand.isUsable())) {
