@@ -1,5 +1,8 @@
 //This class is responsible for helping creat any Monster for our HeroesAndMonsters Game through subclasses.
-public abstract class Monster  {
+
+import util.BattleUtils;
+
+public abstract class Monster {
     private String name;
     private int level;
     private int HP;
@@ -8,7 +11,7 @@ public abstract class Monster  {
     private double dodgeAbility;
     private String monsterType;
 
-    public Monster(String name, int level, int HP, int baseDamage, int defense, double dodgeAbility) {
+    public Monster(String name, int level, int HP, double baseDamage, double defense, double dodgeAbility) {
         this.name = name;
         this.level = level;
         this.HP = HP;
@@ -79,6 +82,77 @@ public abstract class Monster  {
             return true;
         }
         return false;
+    }
+
+    public void takeDamage(double damage) {
+        double effectiveDamage = damage - this.defense;
+        if (effectiveDamage > 0) {
+            this.HP -= effectiveDamage;
+            if (this.HP < 0) {
+                this.HP = 0; // Prevents HP from going negative
+            }
+        }
+    }
+
+    public boolean isAlive() {
+        return this.HP > 0;
+    }
+
+    public void applyTerrainBonus(String terrainType) {
+        this.baseDamage = BattleUtils.applyTerrainBonus(this.baseDamage, terrainType);
+        this.defense = BattleUtils.applyTerrainBonus(this.defense, terrainType);
+        this.dodgeAbility = BattleUtils.applyTerrainBonus(this.dodgeAbility, terrainType);
+    }
+
+    public void removeTerrainBonus(String terrainType) {
+        this.baseDamage = BattleUtils.removeTerrainBonus(this.baseDamage, terrainType);
+        this.defense = BattleUtils.removeTerrainBonus(this.defense, terrainType);
+        this.dodgeAbility = BattleUtils.removeTerrainBonus(this.dodgeAbility, terrainType);
+    }
+
+    // Move the monster towards heroes' Nexus
+    public boolean move(String[][] gameGrid, int currentX, int currentY) {
+        int nextX = currentX + 1; // Move "down" towards Nexus
+        if (nextX < gameGrid.length && !gameGrid[nextX][currentY].equals("Inaccessible")) {
+            System.out.println(this.name + " moved to (" + nextX + ", " + currentY + ").");
+            // Update current position
+            return true;
+        }
+        System.out.println(this.name + " could not move.");
+        return false;
+    }
+
+    // Check if monster has reached the heroes' Nexus
+    public boolean reachedNexus(int currentX, int nexusRow) {
+        return currentX == nexusRow;
+    }
+
+    public void respawn(int nexusX, int nexusY) {
+        this.HP = level * 100; // Reset HP based on level
+        System.out.println(this.name + " respawned at the Nexus (" + nexusX + ", " + nexusY + ").");
+        // Reset position logic (if needed)
+    }
+
+    public Monster(String name, double baseDamage) {
+        this.name = name;
+        this.baseDamage = baseDamage;
+    }
+
+    // Attack method
+    public String attack(Hero hero) {
+        if (!hero.isAlive()) {
+            return hero.getName() + " is already defeated!";
+        }
+
+        double attackDamage = this.baseDamage - hero.getDefense(); // Use Hero's getDefense()
+        if (attackDamage < 0) {
+            attackDamage = 0; // Ensure non-negative damage
+        }
+
+        hero.takeDamage(attackDamage); // Apply damage to Hero
+
+        return this.name + " attacked " + hero.getName() + ", causing " + attackDamage + " damage. " +
+                hero.getName() + "'s remaining HP: " + hero.getHP() + ".";
     }
 
 }
