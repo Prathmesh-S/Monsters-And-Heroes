@@ -10,7 +10,10 @@ public class MonstersAndHeroes extends BoardGame {
 
     public MonstersAndHeroes(List<Player> players) {
         super("Monsters And Heroes (Single-Player)", players);
+    }
 
+    public MonstersAndHeroes(String name, List<Player> players) {
+        super(name, players);
     }
 
     @Override
@@ -114,14 +117,16 @@ public class MonstersAndHeroes extends BoardGame {
                 if (board[i][j].isLabled()) {
                     boxText = board[i][j].getLabel();
                 } else {
-                    boxText = "   ";
-                }
-                if (boxText.length() == 1) {
-                    boxText = "  " + boxText;
-                } else if (boxText.length() == 2) {
-                    boxText = " " + boxText;
+                    boxText = "    ";
                 }
                 colorCode = board[i][j].getColorCode();
+            }
+            if (boxText.length() == 1) {
+                boxText = "   " + boxText;
+            } else if (boxText.length() == 2) {
+                boxText = "  " + boxText;
+            } else if (boxText.length() == 3) {
+                boxText = " " + boxText;
             }
             sb.append("[").append(colorCode).append(boxText).append(ANSI_RESET).append("] ");
         }

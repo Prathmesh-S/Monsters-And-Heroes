@@ -21,8 +21,8 @@ public abstract class Hero {
     private Weapon leftHand = null;
     private Weapon rightHand = null;
     private Armor armor = null;
-    private int currentX; // X-coordinate on the grid
-    private int currentY; // Y-coordinate on the grid
+    private int currentX; // Row Value
+    private int currentY; // Column Value
     private String terrainType;
 
     public Hero(String name, int level, int experiencePoints, int mp, int hp, int strength, int dexterity, int agility,

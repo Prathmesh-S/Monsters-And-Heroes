@@ -10,6 +10,8 @@ public abstract class Monster {
     private double defense;
     private double dodgeAbility;
     private String monsterType;
+    private int currentX; // Row Value
+    private int currentY; // Column Value
 
     public Monster(String name, int level, int HP, double baseDamage, double defense, double dodgeAbility) {
         this.name = name;
@@ -74,6 +76,22 @@ public abstract class Monster {
 
     public String getMonsterType() {
         return monsterType;
+    }
+
+    public int getCurrentX() {
+        return currentX;
+    }
+
+    public void setCurrentX(int currentX) {
+        this.currentX = currentX;
+    }
+
+    public int getCurrentY() {
+        return currentY;
+    }
+
+    public void setCurrentY(int currentY) {
+        this.currentY = currentY;
     }
 
     public boolean equals(Object o) {

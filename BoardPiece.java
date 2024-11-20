@@ -82,30 +82,27 @@ public class BoardPiece {
         switch (type) {
             case INACCESSIBLE:
                 this.isAccessible = false;
-                this.label = "I";
+                setLabel("XXXX", "\u001B[1m\u001B[30m");
                 break;
             case NEXUS:
-                this.label = "N";
+                setLabel("N", "\u001B[34m");
                 break;
             case BUSH:
-                this.label = "B";
+                setLabel("B", "\u001B[32m");
                 break;
             case CAVE:
-                this.label = "C";
+                setLabel("C", "\u001B[90m");
                 break;
             case KOULOU:
-                this.label = "K";
+                setLabel("K", "\u001B[33m");
                 break;
             case OBSTACLE:
-                this.label = "O";
+                setLabel("O", "\u001B[35m");
                 this.isAccessible = false;
                 break;
             default:
-                this.label = "P";
+                this.label = "";
                 break;
         }
     }
-
-    // TODO:When initializing the map, a type can be randomly assigned to each
-    // unit.
 }
