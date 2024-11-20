@@ -43,38 +43,46 @@ public abstract class Hero {
     }
 
     public void applyTerrainBonus() {
-        if ("Bush".equals(terrainType)) {
-            this.dexterity *= 1.1;
-        } else if ("Cave".equals(terrainType)) {
-            this.agility *= 1.1;
-        } else if ("Koulou".equals(terrainType)) {
-            this.strength *= 1.1;
+        resetTerrainBonus(); // Clear existing bonuses
+        switch (terrainType) {
+            case "Bush":
+                this.dexterity *= 1.1;
+                break;
+            case "Cave":
+                this.agility *= 1.1;
+                break;
+            case "Koulou":
+                this.strength *= 1.1;
+                break;
         }
     }
 
-    // Method to reset terrain bonuses
     public void resetTerrainBonus() {
-        if ("Bush".equals(terrainType)) {
-            this.dexterity /= 1.1;
-        } else if ("Cave".equals(terrainType)) {
-            this.agility /= 1.1;
-        } else if ("Koulou".equals(terrainType)) {
-            this.strength /= 1.1;
+        switch (terrainType) {
+            case "Bush":
+                this.dexterity /= 1.1;
+                break;
+            case "Cave":
+                this.agility /= 1.1;
+                break;
+            case "Koulou":
+                this.strength /= 1.1;
+                break;
         }
     }
 
     // Movement method with validation
-    public boolean move(int newX, int newY, String[][] gameGrid) {
-        // Check if the move is valid
-        if (gameGrid[newX][newY].equals("Inaccessible") || gameGrid[newX][newY].equals("Obstacle")) {
+    public boolean move(int newX, int newY, String[][] gameGrid, boolean isMonsterAhead) {
+        if (isMonsterAhead || gameGrid[newX][newY].equals("Inaccessible") ||
+                gameGrid[newX][newY].equals("Obstacle")) {
             System.out.println("Move not allowed.");
             return false;
         }
-        // Update position
+        resetTerrainBonus(); // Remove current terrain bonuses
         this.currentX = newX;
         this.currentY = newY;
-        this.terrainType = gameGrid[newX][newY]; // Update terrain
-        applyTerrainBonus();
+        this.terrainType = gameGrid[newX][newY];
+        applyTerrainBonus(); // Apply new terrain bonuses
         return true;
     }
 

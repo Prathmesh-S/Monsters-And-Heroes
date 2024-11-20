@@ -26,15 +26,13 @@ public class MonsterFactoryManager {
 
                 if (randomNumber == 0) {
                     newMonster.setMonsterType("Dragon");
-                }
-                else if (randomNumber == 1) {
+                } else if (randomNumber == 1) {
                     newMonster.setMonsterType("Exoskeleton");
-                }
-                else {
+                } else {
                     newMonster.setMonsterType("Spirit");
                 }
             } else {
-                i = i -1;
+                i = i - 1;
             }
         }
     }
@@ -44,8 +42,9 @@ public class MonsterFactoryManager {
     }
 
     public static void displayMonstersInTableFormat(List<Monster> monsters) {
-        System.out.println("\033[38;5;197m***************************************************************Monster Information" +
-                "*********************************************************************\033[0m");
+        System.out.println(
+                "\033[38;5;197m***************************************************************Monster Information" +
+                        "*********************************************************************\033[0m");
         System.out.printf("%-15s %-20s %-15s %-15s %-15s %-15s %-15s%n",
                 "Type", "Name", "HP", "Level", "Base Damage", "Defense", "Dodge Ability");
 
@@ -54,7 +53,7 @@ public class MonsterFactoryManager {
             String type = monster.getClass().getSimpleName();
             int hp = monster.getHP();
             int level = monster.getLevel();
-            int baseDamage = (int)monster.getBaseDamage();
+            int baseDamage = (int) monster.getBaseDamage();
             int defense = (int) monster.getDefense();
             int dodgeAbility = (int) monster.getDodgeAbility();
 
@@ -62,11 +61,12 @@ public class MonsterFactoryManager {
                     type, name, hp, level, baseDamage, defense, dodgeAbility);
         }
 
-        System.out.println("\033[38;5;197m**************************************************************************************" +
-                "*****************************************************************\033[0m");
+        System.out.println(
+                "\033[38;5;197m**************************************************************************************" +
+                        "*****************************************************************\033[0m");
     }
 
-    public static List <Monster> scaleLevels(List<Hero> heroes, List <Monster> monsters) {
+    public static List<Monster> scaleLevels(List<Hero> heroes, List<Monster> monsters) {
         int i = 0;
         for (Hero hero : heroes) {
             int heroLevel = hero.getLevel();
@@ -75,4 +75,39 @@ public class MonsterFactoryManager {
         }
         return monsters;
     }
+
+    public void spawnMonsters(String[][] gameGrid, int nexusRow, int[] laneColumns, int highestHeroLevel) {
+        for (int i = 0; i < laneColumns.length; i++) {
+            Monster newMonster = factories[random.nextInt(factories.length)].createCharacter();
+            newMonster.adjustLevel(highestHeroLevel);
+            newMonster.spawnAtNexus(nexusRow, laneColumns[i]);
+            monsters.add(newMonster);
+            gameGrid[nexusRow][laneColumns[i]] = "M"; // Mark monster on the grid
+        }
+    }
+
+    public void monsterTurn(String[][] gameGrid, int heroesNexusRow) {
+        for (Monster monster : monsters) {
+            if (!monster.isAlive())
+                continue; // Skip dead monsters
+            if (monster.reachedNexus(monster.getCurrentX(), heroesNexusRow)) {
+                System.out.println("Monster " + monster.getName() + " has reached the Heroes' Nexus!");
+                // End game or handle victory logic
+                return;
+            }
+            monster.moveTowardsNexus(gameGrid);
+        }
+    }
+
+    public void cleanUpDefeatedMonsters(String[][] gameGrid) {
+        monsters.removeIf(monster -> {
+            if (!monster.isAlive()) {
+                gameGrid[monster.getCurrentX()][monster.getCurrentY()] = "P"; // Reset space to plain
+                System.out.println("Monster " + monster.getName() + " has been defeated.");
+                return true;
+            }
+            return false;
+        });
+    }
+
 }

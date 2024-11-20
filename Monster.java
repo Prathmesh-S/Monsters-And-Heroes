@@ -1,7 +1,5 @@
 //This class is responsible for helping creat any Monster for our HeroesAndMonsters Game through subclasses.
 
-import util.BattleUtils;
-
 public abstract class Monster {
     private String name;
     private int level;
@@ -116,18 +114,6 @@ public abstract class Monster {
         return this.HP > 0;
     }
 
-    public void applyTerrainBonus(String terrainType) {
-        this.baseDamage = BattleUtils.applyTerrainBonus(this.baseDamage, terrainType);
-        this.defense = BattleUtils.applyTerrainBonus(this.defense, terrainType);
-        this.dodgeAbility = BattleUtils.applyTerrainBonus(this.dodgeAbility, terrainType);
-    }
-
-    public void removeTerrainBonus(String terrainType) {
-        this.baseDamage = BattleUtils.removeTerrainBonus(this.baseDamage, terrainType);
-        this.defense = BattleUtils.removeTerrainBonus(this.defense, terrainType);
-        this.dodgeAbility = BattleUtils.removeTerrainBonus(this.dodgeAbility, terrainType);
-    }
-
     // Move the monster towards heroes' Nexus
     public boolean move(String[][] gameGrid, int currentX, int currentY) {
         int nextX = currentX + 1; // Move "down" towards Nexus
@@ -171,6 +157,32 @@ public abstract class Monster {
 
         return this.name + " attacked " + hero.getName() + ", causing " + attackDamage + " damage. " +
                 hero.getName() + "'s remaining HP: " + hero.getHP() + ".";
+    }
+
+    public boolean moveTowardsNexus(String[][] gameGrid) {
+        int nextX = currentX + 1; // Move down
+        if (nextX < gameGrid.length && gameGrid[nextX][currentY].equals("P")) { // Only move to plain spaces
+            gameGrid[currentX][currentY] = "P"; // Clear current position
+            gameGrid[nextX][currentY] = "M"; // Set new position
+            this.currentX = nextX;
+            System.out.println(name + " moved to (" + nextX + ", " + currentY + ").");
+            return true;
+        }
+        System.out.println(name + " could not move.");
+        return false;
+    }
+
+    public void spawnAtNexus(int nexusRow, int column) {
+        this.currentX = nexusRow;
+        this.currentY = column;
+        this.HP = level * 100; // Reset HP based on level
+        System.out.println(name + " spawned at Nexus (" + nexusRow + ", " + column + ").");
+    }
+
+    public void adjustLevel(int heroLevel) {
+        this.level = heroLevel;
+        this.HP = heroLevel * 100;
+        this.baseDamage = heroLevel * 10; // Example scaling
     }
 
 }
