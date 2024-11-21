@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 //This class is responsible for helping creat any Hero for our HeroesAndMonsters Game through subclasses.
 public abstract class Hero {
@@ -26,7 +27,6 @@ public abstract class Hero {
     private String terrainType;
     private int nexusX;
     private int nexusY;
-
 
     public Hero(String name, int level, int experiencePoints, int mp, int hp, int strength, int dexterity, int agility,
             double baseDefense,
@@ -94,24 +94,80 @@ public abstract class Hero {
         int targetX = targetHero.currentX;
         int targetY = targetHero.currentY;
 
-        // Check for valid teleportation
-        if (Math.abs(targetX - this.currentX) <= 1 && Math.abs(targetY - this.currentY) <= 1) {
-            this.currentX = targetX;
-            this.currentY = targetY;
-            this.terrainType = gameGrid[targetX][targetY];
-            applyTerrainBonus();
-            return true;
+        // Conditions:
+        // 1. Must teleport between different lanes.
+        if (Math.abs(targetY - this.currentY) < 2) {
+            System.out.println("Teleport not allowed: must teleport to a different lane.");
+            return false;
         }
-        System.out.println("Teleport not allowed.");
-        return false;
+
+        // 2. Must teleport to a space adjacent to the target hero.
+        if (Math.abs(targetX - this.currentX) > 1 || Math.abs(targetY - this.currentY) > 1) {
+            System.out.println("Teleport not allowed: must be adjacent to the target hero.");
+            return false;
+        }
+
+        // 3. Cannot teleport to a space occupied by another hero.
+        if (!gameGrid[targetX][targetY].equals("Plain") && !gameGrid[targetX][targetY].equals("Nexus")) {
+            System.out.println("Teleport not allowed: target space is inaccessible.");
+            return false;
+        }
+
+        // 4. Cannot teleport ahead of the target hero.
+        if (targetX < this.currentX) {
+            System.out.println("Teleport not allowed: cannot teleport ahead of the target hero.");
+            return false;
+        }
+
+        // Perform teleport
+        resetTerrainBonus();
+        this.currentX = targetX;
+        this.currentY = targetY;
+        this.terrainType = gameGrid[targetX][targetY];
+        applyTerrainBonus();
+        System.out.println(name + " successfully teleported to " + targetX + ", " + targetY + ".");
+        return true;
     }
 
     // Recall action
-    public void recall(int nexusX, int nexusY) {
-        resetTerrainBonus(); // Remove current terrain effects
-        this.currentX = nexusX;
-        this.currentY = nexusY;
-        System.out.println(name + " has recalled to the Nexus.");
+
+    public void recall() {
+        Scanner scanner = new Scanner(System.in);
+        // Prompt the player to enter the hero to fall back to
+        System.out.println("Please select a hero to recall (H1, H2, H3):");
+        String selectedHero = scanner.nextLine().trim().toUpperCase();
+
+        // Determine the hero of choice
+        switch (selectedHero) {
+            case "H1":
+                this.name = "H1";
+                this.currentX = 6; // Hero Nexus X for H1
+                this.currentY = 0; // Hero Nexus Y for H1
+                break;
+            case "H2":
+                this.name = "H2";
+                this.currentX = 6; // Hero Nexus X for H2
+                this.currentY = 3; // Hero Nexus Y for H2
+                break;
+            case "H3":
+                this.name = "H3";
+                this.currentX = 6; // Hero Nexus X for H3
+                this.currentY = 6; // Hero Nexus Y for H3
+                break;
+            default:
+                // Handling of invalid inputs
+                System.out.println("Invalid input. Please choose from H1, H2, or H3.");
+                return;
+        }
+
+        // Reset any terrain-related bonuses or effects
+        resetTerrainBonus();
+
+        // Update the hero's current terrain type to "Hero Nexus"
+        setTerrainType("Hero Nexus");
+
+        // Notify the player that the hero has successfully recalled
+        System.out.printf("%s has recalled to their Nexus at (%d, %d).%n", name, currentX, currentY);
     }
 
     // End-of-round recovery

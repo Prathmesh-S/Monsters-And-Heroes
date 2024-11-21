@@ -86,11 +86,11 @@ public class LegendsOfValor extends MonstersAndHeroes {
                     continue;
                 }
 
-                //Do an option
+                // Do an option
                 System.out.println(printBoard());
                 outOfBattleChoices(hero);
 
-                //Check to see if the hero has won!
+                // Check to see if the hero has won!
                 if (hero.getCurrentX() == 0) {
                     System.out.println(printBoard());
                     System.out.println("\n" + hero.getName() + " has reached the monsters' Nexus! Heroes win!");
@@ -101,15 +101,16 @@ public class LegendsOfValor extends MonstersAndHeroes {
             // Monster Rounds
             for (Monster monster : chosenMonsterList) {
 
-                //Attack a hero if possible.
+                // Attack a hero if possible.
 
-                //Move the monster.
+                // Move the monster.
                 moveMonster(monster);
 
                 // Check if monster has reached the heroes' Nexus
                 if (monster.getCurrentX() == 7) {
                     System.out.println(printBoard());
-                    System.out.println("\n" + monster.getName() + " has reached the heroes' Nexus! Game Over as monsters have won!.");
+                    System.out.println("\n" + monster.getName()
+                            + " has reached the heroes' Nexus! Game Over as monsters have won!.");
                     System.exit(0);
                 }
             }
@@ -125,7 +126,7 @@ public class LegendsOfValor extends MonstersAndHeroes {
 
             System.out.println("--- End of Round " + rounds + " ---");
 
-            //Spawn new monsters if we have surpassed a number of rounds.
+            // Spawn new monsters if we have surpassed a number of rounds.
             if (rounds % 7 == 0) {
                 setUpMonsters();
             }
@@ -134,11 +135,11 @@ public class LegendsOfValor extends MonstersAndHeroes {
 
     public void outOfBattleChoices(Hero hero) {
         System.out.println("\nHero " + hero.getName() + ", it is your turn!");
-        System.out.println("\nPlease Select an Option: (W , A , S , D , Q (quit), I (information) , M (market), P (Consume Potion), E (Equip), MAP) and hit enter. \n");
+        displayMenu();
 
         while (true) {
             String userResponse = scanner.next();
-            //Move the player
+            // Move the player
             if (userResponse.equalsIgnoreCase("w") || userResponse.equalsIgnoreCase("a") ||
                     userResponse.equalsIgnoreCase("s") || userResponse.equalsIgnoreCase("d")) {
                 int newPlayerBoxID = getNewTileID(userResponse, getBoxIDOfHero(hero));
@@ -152,26 +153,33 @@ public class LegendsOfValor extends MonstersAndHeroes {
             } else if (userResponse.equalsIgnoreCase("q")) {
                 System.out.println("The program has quit. Thank you for playing!");
                 System.exit(0);
-                //Show Game Information
+                // Show Game Information
             } else if (userResponse.equalsIgnoreCase("i")) {
                 System.out.println("Hero Information: ");
                 monstersAndHeroesPlayer.displayHeroesInTableFormat();
                 break;
-                //Enter the Market!
+                // Enter the Market!
             } else if (userResponse.equalsIgnoreCase("m")) {
                 System.out.println("Attempting to enter a market.\n");
                 int currentTile = monstersAndHeroesPlayer.getCurrentBoxID();
                 BoardPiece currentPiece = getBoardPieceFromID(currentTile);
                 if (currentPiece instanceof MarketBoardTile) {
-                    ((MarketBoardTile) currentPiece).enterMarket((MarketBoardTile) currentPiece, monstersAndHeroesPlayer);
+                    ((MarketBoardTile) currentPiece).enterMarket((MarketBoardTile) currentPiece,
+                            monstersAndHeroesPlayer);
                     break;
                 } else {
                     System.out.println("You are not in a Market Right Now! Select another option.");
                 }
+            } else if (userResponse.equalsIgnoreCase("r")) {
+                hero.recall();
+                break;
+            } else if (userResponse.equalsIgnoreCase("t")) {
+                // hero.teleport(hero, null);
+                break;
             } else if (userResponse.equalsIgnoreCase("map")) {
                 System.out.println(printBoard());
-                System.out.println("\nPlease Select an Option: (W , A , S , D , Q (quit), I (information) , M (market), P (Consume Potion), E (Equip), MAP) and hit enter. \n");
-                //Potentially consume potions
+                displayMenu();
+                // Potentially consume potions
             } else if (userResponse.equalsIgnoreCase("p")) {
                 potentiallyConsumePotions();
                 break;
@@ -184,11 +192,28 @@ public class LegendsOfValor extends MonstersAndHeroes {
         }
     }
 
+    private void displayMenu() {
+        System.out.println("\nPlease select an action by entering the corresponding letter:");
+        System.out.println("W: Move Up");
+        System.out.println("A: Move Left");
+        System.out.println("S: Move Down");
+        System.out.println("D: Move Right");
+        System.out.println("Q: Quit the Game");
+        System.out.println("I: Show Hero Information");
+        System.out.println("M: Enter the Market");
+        System.out.println("P: Consume a Potion");
+        System.out.println("E: Equip Weapons or Armor");
+        System.out.println("R: Recall to Nexus");
+        System.out.println("T: Teleport to Another Hero");
+        System.out.println("MAP: Display the Game Map Again");
+        System.out.println("\nEnter your choice: ");
+    }
+
     public int getBoxIDOfHero(Hero hero) {
         return (hero.getCurrentX() * boardLength + hero.getCurrentY() + 1);
     }
 
-    //Gets new tile location for W/A/S/D commands
+    // Gets new tile location for W/A/S/D commands
     public Integer getNewTileID(String direction, int currentTileID) {
         int numRows = boardLength, numCols = boardLength;
         int row = (currentTileID - 1) / numCols, col = (currentTileID - 1) % numCols;
@@ -197,7 +222,7 @@ public class LegendsOfValor extends MonstersAndHeroes {
         switch (direction.toLowerCase()) {
             case "w":
 
-                //Check to ensure a Hero is not advancing ahead of a monster
+                // Check to ensure a Hero is not advancing ahead of a monster
                 List<GamePiece> pieces = new ArrayList<>(board[row][col].getGamePieces());
                 if (col + 1 < boardLength) {
                     pieces.addAll(board[row][col + 1].getGamePieces());
@@ -211,7 +236,7 @@ public class LegendsOfValor extends MonstersAndHeroes {
                     }
                 }
 
-                //If we pass this, a hero can move up.
+                // If we pass this, a hero can move up.
                 row--;
                 break;
             case "a":
@@ -227,9 +252,12 @@ public class LegendsOfValor extends MonstersAndHeroes {
 
         int newID = row * numCols + col + 1;
         BoardPiece newBoardPiece = getBoardPieceFromID(newID);
-        if ((newBoardPiece == null) || !newBoardPiece.isAccessible() || (newBoardPiece.getType() == BoardPieceType.OBSTACLE) ||
-                ((newBoardPiece.getFirstGamePiece() != null) && ((newBoardPiece.getFirstGamePiece().getName().equals("H1")) ||
-                        (newBoardPiece.getFirstGamePiece().getName().equals("H2")) || (newBoardPiece.getFirstGamePiece().getName().equals("H3"))))) {
+        if ((newBoardPiece == null) || !newBoardPiece.isAccessible()
+                || (newBoardPiece.getType() == BoardPieceType.OBSTACLE) ||
+                ((newBoardPiece.getFirstGamePiece() != null)
+                        && ((newBoardPiece.getFirstGamePiece().getName().equals("H1")) ||
+                                (newBoardPiece.getFirstGamePiece().getName().equals("H2"))
+                                || (newBoardPiece.getFirstGamePiece().getName().equals("H3"))))) {
             return -1;
         }
 
@@ -237,7 +265,6 @@ public class LegendsOfValor extends MonstersAndHeroes {
                 ? row * numCols + col + 1
                 : -1;
     }
-
 
     public void moveMonster(Monster monster) {
         int row = monster.getCurrentX();
@@ -248,12 +275,14 @@ public class LegendsOfValor extends MonstersAndHeroes {
         BoardPiece currentBoardPiece = getBoardPieceFromID(currentBoxID);
         int newBoxID = currentBoxID + 8;
         BoardPiece newBoardPiece = getBoardPieceFromID(newBoxID);
-        //If we enter this, we know we can not move the monster at the moment (Ex. We have an obstacle or another Monster)
-        if ((newBoardPiece.getType() == BoardPieceType.OBSTACLE) || ((newBoardPiece.getFirstGamePiece() != null) && (newBoardPiece.getFirstGamePiece().getName().equals("M")))) {
+        // If we enter this, we know we can not move the monster at the moment (Ex. We
+        // have an obstacle or another Monster)
+        if ((newBoardPiece.getType() == BoardPieceType.OBSTACLE) || ((newBoardPiece.getFirstGamePiece() != null)
+                && (newBoardPiece.getFirstGamePiece().getName().equals("M")))) {
             return;
         }
 
-        //Check to ensure a Monster is not advancing ahead of a Hero
+        // Check to ensure a Monster is not advancing ahead of a Hero
         List<GamePiece> pieces = new ArrayList<>(board[row][column].getGamePieces());
         if (column + 1 < boardLength) {
             pieces.addAll(board[row][column + 1].getGamePieces());
@@ -267,7 +296,7 @@ public class LegendsOfValor extends MonstersAndHeroes {
             }
         }
 
-        //If we pass this, we can move the monster down
+        // If we pass this, we can move the monster down
         removeSpecificGamePieceOnBoardPiece(getMonsterGamePiece(currentBoardPiece), currentBoardPiece);
         putGamePieceOnBoardPiece(new GamePiece("M", "\u001B[1m\u001B[31m"), newBoxID);
         int newRow = (newBoxID - 1) / boardLength;
@@ -276,7 +305,7 @@ public class LegendsOfValor extends MonstersAndHeroes {
         monster.setCurrentY(newColumn);
     }
 
-    //Moves the player into a correct boxID
+    // Moves the player into a correct boxID
     public void moveHero(Hero hero, int newPlayerBoxID) {
         int currentBoxID = getBoxIDOfHero(hero);
         BoardPiece currentBoardPiece = getBoardPieceFromID(currentBoxID);
@@ -406,7 +435,7 @@ public class LegendsOfValor extends MonstersAndHeroes {
         GamePiece monster2 = new GamePiece("M", "\u001B[1m\u001B[31m");
         GamePiece monster3 = new GamePiece("M", "\u001B[1m\u001B[31m");
 
-        //Spawn new monsters in nexus if possible
+        // Spawn new monsters in nexus if possible
         GamePiece nexus1GamePiece = getBoardPieceFromID(2).getFirstGamePiece();
         GamePiece nexus2GamePiece = getBoardPieceFromID(5).getFirstGamePiece();
         GamePiece nexus3GamePiece = getBoardPieceFromID(8).getFirstGamePiece();
