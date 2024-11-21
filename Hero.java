@@ -43,6 +43,7 @@ public abstract class Hero {
         this.agility = agility;
         this.gold = gold;
         this.baseDefense = baseDefense;
+        this.terrainType = "Plain";
     }
 
     public void applyTerrainBonus() {
@@ -57,6 +58,8 @@ public abstract class Hero {
             case "Koulou":
                 this.strength *= 1.1;
                 break;
+            default:
+                break;
         }
     }
 
@@ -70,6 +73,8 @@ public abstract class Hero {
                 break;
             case "Koulou":
                 this.strength /= 1.1;
+                break;
+            default:
                 break;
         }
     }
@@ -130,35 +135,11 @@ public abstract class Hero {
     }
 
     // Recall action
-
     public void recall() {
-        Scanner scanner = new Scanner(System.in);
-        // Prompt the player to enter the hero to fall back to
-        System.out.println("Please select a hero to recall (H1, H2, H3):");
-        String selectedHero = scanner.nextLine().trim().toUpperCase();
 
-        // Determine the hero of choice
-        switch (selectedHero) {
-            case "H1":
-                this.name = "H1";
-                this.currentX = 6; // Hero Nexus X for H1
-                this.currentY = 0; // Hero Nexus Y for H1
-                break;
-            case "H2":
-                this.name = "H2";
-                this.currentX = 6; // Hero Nexus X for H2
-                this.currentY = 3; // Hero Nexus Y for H2
-                break;
-            case "H3":
-                this.name = "H3";
-                this.currentX = 6; // Hero Nexus X for H3
-                this.currentY = 6; // Hero Nexus Y for H3
-                break;
-            default:
-                // Handling of invalid inputs
-                System.out.println("Invalid input. Please choose from H1, H2, or H3.");
-                return;
-        }
+        //Replace Hero X,Y coords with its nexus coords
+        this.currentX = this.nexusX;
+        this.currentY = this.nexusY;
 
         // Reset any terrain-related bonuses or effects
         resetTerrainBonus();

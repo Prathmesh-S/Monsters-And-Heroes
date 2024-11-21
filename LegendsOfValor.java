@@ -50,14 +50,14 @@ public class LegendsOfValor extends MonstersAndHeroes {
         chosenHeroList.get(0).setNexusY(0);
 
         chosenHeroList.get(1).setCurrentX(7); // Row 7 (heroes' Nexus)
-        chosenHeroList.get(0).setNexusX(7);
+        chosenHeroList.get(1).setNexusX(7);
         chosenHeroList.get(1).setCurrentY(3); // Column 3 (middle lane)
-        chosenHeroList.get(0).setNexusY(3);
+        chosenHeroList.get(1).setNexusY(3);
 
         chosenHeroList.get(2).setCurrentX(7); // Row 7 (heroes' Nexus)
-        chosenHeroList.get(0).setNexusX(7);
+        chosenHeroList.get(2).setNexusX(7);
         chosenHeroList.get(2).setCurrentY(6); // Column 6 (third lane)
-        chosenHeroList.get(0).setNexusY(6);
+        chosenHeroList.get(2).setNexusY(6);
 
         // Create Our Monsters
         setUpMonsters();
@@ -171,7 +171,10 @@ public class LegendsOfValor extends MonstersAndHeroes {
                     System.out.println("You are not in a Market Right Now! Select another option.");
                 }
             } else if (userResponse.equalsIgnoreCase("r")) {
+                GamePiece heroPiece = LegendsOfValor.getHeroGamePiece(getBoardPieceFromID(getBoxIDOfHero(hero)));
+                BoardGame.removeSpecificGamePieceOnBoardPiece(heroPiece, getBoardPieceFromID(getBoxIDOfHero(hero)));
                 hero.recall();
+                putGamePieceOnBoardPiece(heroPiece, getBoxIDOfHero(hero));
                 break;
             } else if (userResponse.equalsIgnoreCase("t")) {
                 // hero.teleport(hero, null);
@@ -194,10 +197,7 @@ public class LegendsOfValor extends MonstersAndHeroes {
 
     private void displayMenu() {
         System.out.println("\nPlease select an action by entering the corresponding letter:");
-        System.out.println("W: Move Up");
-        System.out.println("A: Move Left");
-        System.out.println("S: Move Down");
-        System.out.println("D: Move Right");
+        System.out.println("(W,A,S,D): Move Up, Left, Down, Right");
         System.out.println("Q: Quit the Game");
         System.out.println("I: Show Hero Information");
         System.out.println("M: Enter the Market");
@@ -317,7 +317,7 @@ public class LegendsOfValor extends MonstersAndHeroes {
         hero.setCurrentY(newColumn);
     }
 
-    public GamePiece getHeroGamePiece(BoardPiece currentBoardPiece) {
+    public static GamePiece getHeroGamePiece(BoardPiece currentBoardPiece) {
         List<GamePiece> pieces = currentBoardPiece.getGamePieces();
         for (GamePiece piece : pieces) {
             if ((piece.getName().equals("H1")) || (piece.getName().equals("H2")) || (piece.getName().equals("H3"))) {
@@ -327,7 +327,7 @@ public class LegendsOfValor extends MonstersAndHeroes {
         return null;
     }
 
-    public GamePiece getMonsterGamePiece(BoardPiece currentBoardPiece) {
+    public static GamePiece getMonsterGamePiece(BoardPiece currentBoardPiece) {
         List<GamePiece> pieces = currentBoardPiece.getGamePieces();
         for (GamePiece piece : pieces) {
             if ((piece.getName().equals("M"))) {
@@ -380,6 +380,7 @@ public class LegendsOfValor extends MonstersAndHeroes {
             }
         }
     }
+
 
     @Override
     public String printBoard() {
