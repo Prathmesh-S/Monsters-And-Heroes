@@ -24,6 +24,9 @@ public abstract class Hero {
     private int currentX; // Row Value
     private int currentY; // Column Value
     private String terrainType;
+    private int nexusX;
+    private int nexusY;
+
 
     public Hero(String name, int level, int experiencePoints, int mp, int hp, int strength, int dexterity, int agility,
             double baseDefense,
@@ -142,6 +145,22 @@ public abstract class Hero {
 
     public void setCurrentY(int currentY) {
         this.currentY = currentY;
+    }
+
+    public int getNexusX() {
+        return nexusX;
+    }
+
+    public void setNexusX(int nexusX) {
+        this.nexusX = nexusX;
+    }
+
+    public int getNexusY() {
+        return nexusY;
+    }
+
+    public void setNexusY(int nexusY) {
+        this.nexusY = nexusY;
     }
 
     public String getTerrainType() {

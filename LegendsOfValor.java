@@ -45,13 +45,19 @@ public class LegendsOfValor extends MonstersAndHeroes {
         putGamePieceOnBoardPiece(monstersAndHeroesPlayerGamePiece3, 63);
         // Set initial positions for heroes correctly
         chosenHeroList.get(0).setCurrentX(7); // Row 7 (heroes' Nexus)
+        chosenHeroList.get(0).setNexusX(7);
         chosenHeroList.get(0).setCurrentY(0); // Column 0 (first lane)
+        chosenHeroList.get(0).setNexusY(0);
 
         chosenHeroList.get(1).setCurrentX(7); // Row 7 (heroes' Nexus)
+        chosenHeroList.get(0).setNexusX(7);
         chosenHeroList.get(1).setCurrentY(3); // Column 3 (middle lane)
+        chosenHeroList.get(0).setNexusY(3);
 
         chosenHeroList.get(2).setCurrentX(7); // Row 7 (heroes' Nexus)
+        chosenHeroList.get(0).setNexusX(7);
         chosenHeroList.get(2).setCurrentY(6); // Column 6 (third lane)
+        chosenHeroList.get(0).setNexusY(6);
 
         // Create Our Monsters
         setUpMonsters();
@@ -70,8 +76,8 @@ public class LegendsOfValor extends MonstersAndHeroes {
     @Override
     public void startNewRoundOfGame() {
         while (true) {
+            rounds++;
             System.out.println("\n--- Round " + rounds + " ---");
-            System.out.println(printBoard());
 
             // Hero Rounds
             for (Hero hero : chosenHeroList) {
@@ -80,34 +86,32 @@ public class LegendsOfValor extends MonstersAndHeroes {
                     continue;
                 }
 
-                System.out.println("It's " + hero.getName() + "'s turn.");
-                System.out.println("Available actions: Move, Attack, Use Potion, Equip, Teleport, Recall");
-                String action = getPlayerInput("Choose an action: ");
-                System.out.println(hero.getName() + " chose to " + action);
-            }
+                //Do an option
+                System.out.println(printBoard());
+                outOfBattleChoices(hero);
 
-            // Check if any hero has reached the monsters' Nexus
-            for (Hero hero : chosenHeroList) {
+                //Check to see if the hero has won!
                 if (hero.getCurrentX() == 0) {
-                    System.out.println(hero.getName() + " has reached the monsters' Nexus! Heroes win!");
-                    return;
+                    System.out.println(printBoard());
+                    System.out.println("\n" + hero.getName() + " has reached the monsters' Nexus! Heroes win!");
+                    System.exit(0);
                 }
             }
 
             // Monster Rounds
             for (Monster monster : chosenMonsterList) {
-                if (!monster.isAlive()) {
-                    System.out.println(monster.getName() + " is dead and will respawn next round.");
-                    continue;
-                }
+
+                //Attack a hero if possible.
+
+                //Move the monster.
+                moveMonster(monster);
 
                 // Check if monster has reached the heroes' Nexus
-                if (monster.reachedNexus(monster.getCurrentX(), 7)) {
-                    System.out.println(monster.getName() + " has reached the heroes' Nexus! Game Over.");
-                    return;
+                if (monster.getCurrentX() == 7) {
+                    System.out.println(printBoard());
+                    System.out.println("\n" + monster.getName() + " has reached the heroes' Nexus! Game Over as monsters have won!.");
+                    System.exit(0);
                 }
-                // Monster Actions
-                System.out.println(monster.getName() + " is deciding its action...");
             }
 
             // End-of-round recovery and respawn
@@ -119,15 +123,189 @@ public class LegendsOfValor extends MonstersAndHeroes {
                 }
             }
 
-            for (Monster monster : chosenMonsterList) {
-                if (!monster.isAlive()) {
-                    monster.respawn(0, monster.getCurrentY());
-                }
-            }
-
-            rounds++;
             System.out.println("--- End of Round " + rounds + " ---");
+
+            //Spawn new monsters if we have surpassed a number of rounds.
+            if (rounds % 7 == 0) {
+                setUpMonsters();
+            }
         }
+    }
+
+    public void outOfBattleChoices(Hero hero) {
+        System.out.println("\nHero " + hero.getName() + ", it is your turn!");
+        System.out.println("\nPlease Select an Option: (W , A , S , D , Q (quit), I (information) , M (market), P (Consume Potion), E (Equip), MAP) and hit enter. \n");
+
+        while (true) {
+            String userResponse = scanner.next();
+            //Move the player
+            if (userResponse.equalsIgnoreCase("w") || userResponse.equalsIgnoreCase("a") ||
+                    userResponse.equalsIgnoreCase("s") || userResponse.equalsIgnoreCase("d")) {
+                int newPlayerBoxID = getNewTileID(userResponse, getBoxIDOfHero(hero));
+                if (newPlayerBoxID != -1) {
+                    moveHero(hero, newPlayerBoxID);
+                    break;
+                } else {
+                    System.out.println("Please enter a valid response.");
+                }
+                // Quit the Game
+            } else if (userResponse.equalsIgnoreCase("q")) {
+                System.out.println("The program has quit. Thank you for playing!");
+                System.exit(0);
+                //Show Game Information
+            } else if (userResponse.equalsIgnoreCase("i")) {
+                System.out.println("Hero Information: ");
+                monstersAndHeroesPlayer.displayHeroesInTableFormat();
+                break;
+                //Enter the Market!
+            } else if (userResponse.equalsIgnoreCase("m")) {
+                System.out.println("Attempting to enter a market.\n");
+                int currentTile = monstersAndHeroesPlayer.getCurrentBoxID();
+                BoardPiece currentPiece = getBoardPieceFromID(currentTile);
+                if (currentPiece instanceof MarketBoardTile) {
+                    ((MarketBoardTile) currentPiece).enterMarket((MarketBoardTile) currentPiece, monstersAndHeroesPlayer);
+                    break;
+                } else {
+                    System.out.println("You are not in a Market Right Now! Select another option.");
+                }
+            } else if (userResponse.equalsIgnoreCase("map")) {
+                System.out.println(printBoard());
+                System.out.println("\nPlease Select an Option: (W , A , S , D , Q (quit), I (information) , M (market), P (Consume Potion), E (Equip), MAP) and hit enter. \n");
+                //Potentially consume potions
+            } else if (userResponse.equalsIgnoreCase("p")) {
+                potentiallyConsumePotions();
+                break;
+            } else if (userResponse.equalsIgnoreCase("e")) {
+                equipWeaponAndArmour(monstersAndHeroesPlayer);
+                break;
+            } else {
+                System.out.println("Please enter a valid response.");
+            }
+        }
+    }
+
+    public int getBoxIDOfHero(Hero hero) {
+        return (hero.getCurrentX() * boardLength + hero.getCurrentY() + 1);
+    }
+
+    //Gets new tile location for W/A/S/D commands
+    public Integer getNewTileID(String direction, int currentTileID) {
+        int numRows = boardLength, numCols = boardLength;
+        int row = (currentTileID - 1) / numCols, col = (currentTileID - 1) % numCols;
+        BoardPiece[][] board = getBoard();
+
+        switch (direction.toLowerCase()) {
+            case "w":
+
+                //Check to ensure a Hero is not advancing ahead of a monster
+                List<GamePiece> pieces = new ArrayList<>(board[row][col].getGamePieces());
+                if (col + 1 < boardLength) {
+                    pieces.addAll(board[row][col + 1].getGamePieces());
+                }
+                if (col - 1 >= 0) {
+                    pieces.addAll(board[row][col - 1].getGamePieces());
+                }
+                for (GamePiece piece : pieces) {
+                    if (piece.getName().equals("M")) {
+                        return -1;
+                    }
+                }
+
+                //If we pass this, a hero can move up.
+                row--;
+                break;
+            case "a":
+                col--;
+                break;
+            case "s":
+                row++;
+                break;
+            case "d":
+                col++;
+                break;
+        }
+
+        int newID = row * numCols + col + 1;
+        BoardPiece newBoardPiece = getBoardPieceFromID(newID);
+        if ((newBoardPiece == null) || !newBoardPiece.isAccessible() || (newBoardPiece.getType() == BoardPieceType.OBSTACLE) ||
+                ((newBoardPiece.getFirstGamePiece() != null) && ((newBoardPiece.getFirstGamePiece().getName().equals("H1")) ||
+                        (newBoardPiece.getFirstGamePiece().getName().equals("H2")) || (newBoardPiece.getFirstGamePiece().getName().equals("H3"))))) {
+            return -1;
+        }
+
+        return (row >= 0 && row < numRows && col >= 0 && col < numCols)
+                ? row * numCols + col + 1
+                : -1;
+    }
+
+
+    public void moveMonster(Monster monster) {
+        int row = monster.getCurrentX();
+        int column = monster.getCurrentY();
+        BoardPiece[][] board = getBoard();
+
+        int currentBoxID = row * boardLength + column + 1;
+        BoardPiece currentBoardPiece = getBoardPieceFromID(currentBoxID);
+        int newBoxID = currentBoxID + 8;
+        BoardPiece newBoardPiece = getBoardPieceFromID(newBoxID);
+        //If we enter this, we know we can not move the monster at the moment (Ex. We have an obstacle or another Monster)
+        if ((newBoardPiece.getType() == BoardPieceType.OBSTACLE) || ((newBoardPiece.getFirstGamePiece() != null) && (newBoardPiece.getFirstGamePiece().getName().equals("M")))) {
+            return;
+        }
+
+        //Check to ensure a Monster is not advancing ahead of a Hero
+        List<GamePiece> pieces = new ArrayList<>(board[row][column].getGamePieces());
+        if (column + 1 < boardLength) {
+            pieces.addAll(board[row][column + 1].getGamePieces());
+        }
+        if (column - 1 >= 0) {
+            pieces.addAll(board[row][column - 1].getGamePieces());
+        }
+        for (GamePiece piece : pieces) {
+            if ((piece.getName().equals("H1")) || (piece.getName().equals("H2")) || (piece.getName().equals("H3"))) {
+                return;
+            }
+        }
+
+        //If we pass this, we can move the monster down
+        removeSpecificGamePieceOnBoardPiece(getMonsterGamePiece(currentBoardPiece), currentBoardPiece);
+        putGamePieceOnBoardPiece(new GamePiece("M", "\u001B[1m\u001B[31m"), newBoxID);
+        int newRow = (newBoxID - 1) / boardLength;
+        int newColumn = (newBoxID - 1) % boardLength;
+        monster.setCurrentX(newRow);
+        monster.setCurrentY(newColumn);
+    }
+
+    //Moves the player into a correct boxID
+    public void moveHero(Hero hero, int newPlayerBoxID) {
+        int currentBoxID = getBoxIDOfHero(hero);
+        BoardPiece currentBoardPiece = getBoardPieceFromID(currentBoxID);
+        putGamePieceOnBoardPiece(getHeroGamePiece(currentBoardPiece), newPlayerBoxID);
+        removeSpecificGamePieceOnBoardPiece(getHeroGamePiece(currentBoardPiece), currentBoardPiece);
+        int newRow = (newPlayerBoxID - 1) / boardLength;
+        int newColumn = (newPlayerBoxID - 1) % boardLength;
+        hero.setCurrentX(newRow);
+        hero.setCurrentY(newColumn);
+    }
+
+    public GamePiece getHeroGamePiece(BoardPiece currentBoardPiece) {
+        List<GamePiece> pieces = currentBoardPiece.getGamePieces();
+        for (GamePiece piece : pieces) {
+            if ((piece.getName().equals("H1")) || (piece.getName().equals("H2")) || (piece.getName().equals("H3"))) {
+                return piece;
+            }
+        }
+        return null;
+    }
+
+    public GamePiece getMonsterGamePiece(BoardPiece currentBoardPiece) {
+        List<GamePiece> pieces = currentBoardPiece.getGamePieces();
+        for (GamePiece piece : pieces) {
+            if ((piece.getName().equals("M"))) {
+                return piece;
+            }
+        }
+        return null;
     }
 
     // Create Inaccessible, Market, and Common Space Tiles
@@ -179,7 +357,9 @@ public class LegendsOfValor extends MonstersAndHeroes {
         StringBuilder sb = new StringBuilder();
         sb.append("\nLegend:\n");
         sb.append("\u001B[1m\u001B[30mXXXX\u001B[0m - Inaccessible\n"); // Black
-        sb.append("\u001B[1m\u001B[92mH1,H2,H3\u001B[0m - Your heroes!\n");
+        sb.append("\u001B[1m\u001B[92mH1\u001B[0m - Your hero : " + chosenHeroList.get(0).getName() + "\n");
+        sb.append("\u001B[1m\u001B[92mH2\u001B[0m - Your hero : " + chosenHeroList.get(1).getName() + "\n");
+        sb.append("\u001B[1m\u001B[92mH3\u001B[0m - Your hero : " + chosenHeroList.get(2).getName() + "\n");
         sb.append("\u001B[1m\u001B[31mM\u001B[0m - The monsters!\n");
         sb.append("\u001B[34mN\u001B[0m - Nexus/Market\n"); // Blue
         sb.append("\u001B[32mB\u001B[0m - Bush (Dexterity Boost)\n"); // Green
@@ -225,17 +405,29 @@ public class LegendsOfValor extends MonstersAndHeroes {
         GamePiece monster1 = new GamePiece("M", "\u001B[1m\u001B[31m");
         GamePiece monster2 = new GamePiece("M", "\u001B[1m\u001B[31m");
         GamePiece monster3 = new GamePiece("M", "\u001B[1m\u001B[31m");
-        putGamePieceOnBoardPiece(monster1, 2);
-        putGamePieceOnBoardPiece(monster2, 5);
-        putGamePieceOnBoardPiece(monster3, 8);
 
-        // Set Monster Positions
-        monsters.get(0).setCurrentX(0);
-        monsters.get(0).setCurrentY(1);
-        monsters.get(1).setCurrentX(0);
-        monsters.get(1).setCurrentY(4);
-        monsters.get(2).setCurrentX(0);
-        monsters.get(2).setCurrentY(7);
+        //Spawn new monsters in nexus if possible
+        GamePiece nexus1GamePiece = getBoardPieceFromID(2).getFirstGamePiece();
+        GamePiece nexus2GamePiece = getBoardPieceFromID(5).getFirstGamePiece();
+        GamePiece nexus3GamePiece = getBoardPieceFromID(8).getFirstGamePiece();
+
+        if (nexus1GamePiece == null) {
+            putGamePieceOnBoardPiece(monster1, 2);
+            monsters.get(0).setCurrentX(0);
+            monsters.get(0).setCurrentY(1);
+        }
+
+        if (nexus2GamePiece == null) {
+            putGamePieceOnBoardPiece(monster2, 5);
+            monsters.get(1).setCurrentX(0);
+            monsters.get(1).setCurrentY(4);
+        }
+
+        if (nexus3GamePiece == null) {
+            putGamePieceOnBoardPiece(monster3, 8);
+            monsters.get(2).setCurrentX(0);
+            monsters.get(2).setCurrentY(7);
+        }
     }
 
 }

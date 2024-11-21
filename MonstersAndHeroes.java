@@ -38,7 +38,7 @@ public class MonstersAndHeroes extends BoardGame {
 
         //Create our Specific Player/Heroes and place on the map
         Player generalPlayer = getPlayers().get(0);
-        monstersAndHeroesPlayer = new MonstersAndHeroesPlayer(generalPlayer.getName(),chosenHeroList);
+        monstersAndHeroesPlayer = new MonstersAndHeroesPlayer(generalPlayer.getName(), chosenHeroList);
         monstersAndHeroesPlayer.setCurrentBoxID(1);
         GamePiece monstersAndHeroesPlayerGamePiece = new GamePiece("YOU", "\u001B[92m");
         monstersAndHeroesTeam = new Team(monstersAndHeroesPlayer.getName(), Arrays.asList(monstersAndHeroesPlayerGamePiece));
@@ -88,7 +88,7 @@ public class MonstersAndHeroes extends BoardGame {
     //Create and return a string representing our 2D board and its state
     public String printBoard() {
 
-        BoardPiece [][] board = getBoard();
+        BoardPiece[][] board = getBoard();
 
         StringBuilder sb = new StringBuilder();
         sb.append("\n");
@@ -111,7 +111,15 @@ public class MonstersAndHeroes extends BoardGame {
             String boxText;
             String colorCode;
             if (board[i][j].getFirstGamePiece() != null) {
-                boxText = board[i][j].getFirstGamePiece().getName();
+
+                //Check to see if multiple gamePieces exist:
+                List<GamePiece> gamePieces = board[i][j].getGamePieces();
+                if (gamePieces.size() == 2) {
+                    boxText = gamePieces.get(0).getColorCode() + gamePieces.get(0).getName() + ANSI_RESET + "," + gamePieces.get(1).getColorCode() + gamePieces.get(1).getName();
+                } else {
+                    boxText = board[i][j].getFirstGamePiece().getName();
+                }
+
                 colorCode = board[i][j].getFirstGamePiece().getColorCode();
             } else {
                 if (board[i][j].isLabled()) {
@@ -273,8 +281,8 @@ public class MonstersAndHeroes extends BoardGame {
         while (numHeroes > 0) {
             System.out.println("\nThis is the remaining list of your possible heroes!");
             HeroFactoryManager.displayHeroesInTableFormat(heroes);
-            System.out.println("\nYou must select " +numHeroes + " more heroes. Please choose the index of the next hero you would like to select!");
-            int chosenIndex = BoardGame.getNumberResponse(0, heroes.size() -1, "chosen index of your next hero", "Your index must be ",
+            System.out.println("\nYou must select " + numHeroes + " more heroes. Please choose the index of the next hero you would like to select!");
+            int chosenIndex = BoardGame.getNumberResponse(0, heroes.size() - 1, "chosen index of your next hero", "Your index must be ",
                     "Your index must be ", "Incorrect hero index chosen!");
             newHeroes.add(heroes.get(chosenIndex));
             heroes.remove(chosenIndex);

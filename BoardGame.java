@@ -173,6 +173,17 @@ public abstract class BoardGame {
         IDToPieceMap.get(boxID).removeGamePieces();
     }
 
+    public void removeSpecificGamePieceOnBoardPiece (GamePiece piece, BoardPiece currentBoardPiece) {
+        List<GamePiece> pieces = currentBoardPiece.getGamePieces();
+        List<GamePiece> finalPieces = new ArrayList<>();
+        for (GamePiece gamePiece : pieces) {
+            if (gamePiece != piece) {
+                finalPieces.add(gamePiece);
+            }
+        }
+        currentBoardPiece.setGamePieces(finalPieces);
+    }
+
     public void swapBoardPieces(int piece1ID, BoardPiece piece2) {
         IDToPieceMap.put(piece1ID, piece2);
     }

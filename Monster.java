@@ -176,7 +176,7 @@ public abstract class Monster {
         this.currentX = nexusRow;
         this.currentY = column;
         this.HP = level * 100; // Reset HP based on level
-        System.out.println(name + " spawned at Nexus (" + nexusRow + ", " + column + ").");
+        System.out.println("\n" + name + " spawned at Nexus (" + nexusRow + ", " + column + ").");
     }
 
     public void adjustLevel(int heroLevel) {

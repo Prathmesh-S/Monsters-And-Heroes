@@ -26,6 +26,10 @@ public class BoardPiece {
             gamePieces.add(gamePiece);
         }
     }
+    public void setGamePieces(List<GamePiece> gamePieces) {
+        this.gamePieces = gamePieces;
+    }
+
 
     public void removeGamePieces() {
         gamePieces = new ArrayList<GamePiece>();
