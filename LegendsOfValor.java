@@ -1,8 +1,6 @@
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
-import java.util.Scanner;
 
 //The main class that starts a Legends of Valor Game, managing gameplay elements and interactions between Heroes and Monsters within the game.
 public class LegendsOfValor extends MonstersAndHeroes {
@@ -59,18 +57,16 @@ public class LegendsOfValor extends MonstersAndHeroes {
         chosenHeroList.get(2).setCurrentY(6); // Column 6 (third lane)
         chosenHeroList.get(2).setNexusY(6);
 
+        chosenHeroList.get(0).setIdentifier("H1");
+        chosenHeroList.get(1).setIdentifier("H2");
+        chosenHeroList.get(2).setIdentifier("H3");
+
         // Create Our Monsters
         setUpMonsters();
 
         // Start our Game
         startNewRoundOfGame();
 
-    }
-
-    private String getPlayerInput(String prompt) {
-        System.out.print(prompt);
-        Scanner scanner = new Scanner(System.in);
-        return scanner.nextLine();
     }
 
     @Override
@@ -170,14 +166,34 @@ public class LegendsOfValor extends MonstersAndHeroes {
                 } else {
                     System.out.println("You are not in a Market Right Now! Select another option.");
                 }
+                // recall
             } else if (userResponse.equalsIgnoreCase("r")) {
                 GamePiece heroPiece = LegendsOfValor.getHeroGamePiece(getBoardPieceFromID(getBoxIDOfHero(hero)));
                 BoardGame.removeSpecificGamePieceOnBoardPiece(heroPiece, getBoardPieceFromID(getBoxIDOfHero(hero)));
                 hero.recall();
                 putGamePieceOnBoardPiece(heroPiece, getBoxIDOfHero(hero));
+                System.out.println(printBoard());
                 break;
+                // teleport
             } else if (userResponse.equalsIgnoreCase("t")) {
-                // hero.teleport(hero, null);
+                System.out.println("Select a hero to teleport to:");
+                for (int i = 0; i < chosenHeroList.size(); i++) {
+                    Hero targetHero = chosenHeroList.get(i);
+                    System.out.println((i + 1) + ": " + targetHero.getName() + " at (" + targetHero.getCurrentX() + ", "
+                            + targetHero.getCurrentY() + ")");
+                }
+                int choice = scanner.nextInt() - 1;
+
+                if (choice >= 0 && choice < chosenHeroList.size()) {
+                    Hero targetHero = chosenHeroList.get(choice);
+                    if (hero.teleport(targetHero, this)) { // Pass the game object
+                        System.out.println(printBoard()); // Display updated board after teleport
+                    } else {
+                        System.out.println("Teleportation failed.");
+                    }
+                } else {
+                    System.out.println("Invalid choice. Turn skipped.");
+                }
                 break;
             } else if (userResponse.equalsIgnoreCase("map")) {
                 System.out.println(printBoard());
@@ -380,7 +396,6 @@ public class LegendsOfValor extends MonstersAndHeroes {
             }
         }
     }
-
 
     @Override
     public String printBoard() {

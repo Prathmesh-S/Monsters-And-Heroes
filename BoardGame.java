@@ -173,7 +173,7 @@ public abstract class BoardGame {
         IDToPieceMap.get(boxID).removeGamePieces();
     }
 
-    public static void removeSpecificGamePieceOnBoardPiece (GamePiece piece, BoardPiece currentBoardPiece) {
+    public static void removeSpecificGamePieceOnBoardPiece(GamePiece piece, BoardPiece currentBoardPiece) {
         List<GamePiece> pieces = currentBoardPiece.getGamePieces();
         List<GamePiece> finalPieces = new ArrayList<>();
         for (GamePiece gamePiece : pieces) {
@@ -196,15 +196,5 @@ public abstract class BoardGame {
     public abstract void startGame();
 
     public abstract void startNewRoundOfGame();
-
-    public boolean isMoveValid(Hero hero, int targetX, int targetY) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'isMoveValid'");
-    }
-
-    public void moveHeroToNexus(Hero hero) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'moveHeroToNexus'");
-    }
 
 }

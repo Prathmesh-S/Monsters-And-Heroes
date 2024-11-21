@@ -27,6 +27,15 @@ public abstract class Hero {
     private String terrainType;
     private int nexusX;
     private int nexusY;
+    private String identifier;
+
+    public String getIdentifier() {
+        return identifier;
+    }
+
+    public void setIdentifier(String identifier) {
+        this.identifier = identifier;
+    }
 
     public Hero(String name, int level, int experiencePoints, int mp, int hp, int strength, int dexterity, int agility,
             double baseDefense,
@@ -95,49 +104,59 @@ public abstract class Hero {
     }
 
     // Teleport action
-    public boolean teleport(Hero targetHero, String[][] gameGrid) {
-        int targetX = targetHero.currentX;
-        int targetY = targetHero.currentY;
+    public boolean teleport(Hero targetHero, LegendsOfValor game) {
+        int targetX = targetHero.getCurrentX();
+        int targetY = targetHero.getCurrentY();
 
-        // Conditions:
-        // 1. Must teleport between different lanes.
-        if (Math.abs(targetY - this.currentY) < 2) {
-            System.out.println("Teleport not allowed: must teleport to a different lane.");
+        // Check if teleporting to the same lane
+        if (Math.abs(targetY - this.getCurrentY()) <= 1) {
+            System.out.println("Teleport not allowed: Must teleport to a different lane.");
             return false;
         }
 
-        // 2. Must teleport to a space adjacent to the target hero.
-        if (Math.abs(targetX - this.currentX) > 1 || Math.abs(targetY - this.currentY) > 1) {
-            System.out.println("Teleport not allowed: must be adjacent to the target hero.");
-            return false;
-        }
+        // Define possible adjacent spaces
+        int[][] directions = { { -1, 0 }, { 1, 0 }, { 0, -1 }, { 0, 1 } }; // North, South, West, East
 
-        // 3. Cannot teleport to a space occupied by another hero.
-        if (!gameGrid[targetX][targetY].equals("Plain") && !gameGrid[targetX][targetY].equals("Nexus")) {
-            System.out.println("Teleport not allowed: target space is inaccessible.");
-            return false;
-        }
+        // Iterate over possible spaces around the target hero
+        BoardPiece[][] board = game.getBoard();
+        for (int[] dir : directions) {
+            int newX = targetX + dir[0];
+            int newY = targetY + dir[1];
 
-        // 4. Cannot teleport ahead of the target hero.
-        if (targetX < this.currentX) {
-            System.out.println("Teleport not allowed: cannot teleport ahead of the target hero.");
-            return false;
-        }
+            // Check board boundaries
+            if (newX < 0 || newX >= board.length || newY < 0 || newY >= board[0].length) {
+                continue;
+            }
 
-        // Perform teleport
-        resetTerrainBonus();
-        this.currentX = targetX;
-        this.currentY = targetY;
-        this.terrainType = gameGrid[targetX][targetY];
-        applyTerrainBonus();
-        System.out.println(name + " successfully teleported to " + targetX + ", " + targetY + ".");
-        return true;
+            BoardPiece targetPiece = board[newX][newY];
+
+            // Ensure the space is accessible
+            if (targetPiece == null || !targetPiece.isAccessible()) {
+                continue;
+            }
+            BoardPiece currentPiece = board[this.getCurrentX()][this.getCurrentY()];
+            currentPiece.getGamePieces().removeIf(piece -> piece.getName().equals(this.getIdentifier()));
+            // identifier
+            targetPiece.addGamePiece(new GamePiece(this.getIdentifier(), "\u001B[1m\u001B[92m")); // Use identifier
+
+            // Update hero position
+            this.setCurrentX(newX);
+            this.setCurrentY(newY);
+            this.setTerrainType(targetPiece.getType().name()); // Set terrain type based on the board piece
+            applyTerrainBonus();
+
+            System.out.println(this.getIdentifier() + " successfully teleported to (" + newX + ", " + newY + ").");
+
+            return true;
+        }
+        System.out.println("Teleport failed: No valid space adjacent to the target hero.");
+        return false;
     }
 
     // Recall action
     public void recall() {
 
-        //Replace Hero X,Y coords with its nexus coords
+        // Replace Hero X,Y coords with its nexus coords
         this.currentX = this.nexusX;
         this.currentY = this.nexusY;
 
