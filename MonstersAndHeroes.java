@@ -5,7 +5,7 @@ public class MonstersAndHeroes extends BoardGame {
 
     private int boardLength;
     private int numHeroes;
-    private MonstersAndHeroesPlayer monstersAndHeroesPlayer;
+    protected MonstersAndHeroesPlayer monstersAndHeroesPlayer;
     private Team monstersAndHeroesTeam;
 
     public MonstersAndHeroes(List<Player> players) {
@@ -159,7 +159,7 @@ public class MonstersAndHeroes extends BoardGame {
                     }
                     break;
                 } else {
-                    System.out.println("Please enter a valid response.");
+                    System.out.println("Please enter a valid response and ensure your hero is moving following all game rules!.");
                 }
                 // Quit the Game
             } else if (userResponse.equalsIgnoreCase("q")) {
@@ -186,10 +186,12 @@ public class MonstersAndHeroes extends BoardGame {
                 System.out.println("\nPlease Select an Option: (W , A , S , D , Q (quit), I (information) , M (market), P (Consume Potion), E (Equip), MAP) and hit enter. \n");
                 //Potentially consume potions
             } else if (userResponse.equalsIgnoreCase("p")) {
-                potentiallyConsumePotions();
+                List<Hero> heroes = monstersAndHeroesPlayer.getHeroes();
+                potentiallyConsumePotions(heroes, monstersAndHeroesPlayer);
                 break;
             } else if (userResponse.equalsIgnoreCase("e")) {
-                equipWeaponAndArmour(monstersAndHeroesPlayer);
+                List<Hero> heroes = monstersAndHeroesPlayer.getHeroes();
+                equipWeaponAndArmour(heroes, monstersAndHeroesPlayer);
                 break;
             } else {
                 System.out.println("Please enter a valid response.");
@@ -197,16 +199,14 @@ public class MonstersAndHeroes extends BoardGame {
         }
     }
 
-    public void potentiallyConsumePotions() {
-        List<Hero> heroes = monstersAndHeroesPlayer.getHeroes();
+    public void potentiallyConsumePotions(List<Hero> heroes, MonstersAndHeroesPlayer monstersAndHeroesPlayer) {
         BattleStrategy potionStrategy = new PotionStrategy();
         for (Hero hero : heroes) {
             potionStrategy.executeStrategy(monstersAndHeroesPlayer, hero, null);
         }
     }
 
-    public void equipWeaponAndArmour(MonstersAndHeroesPlayer monstersAndHeroesPlayer) {
-        List<Hero> heroes = monstersAndHeroesPlayer.getHeroes();
+    public void equipWeaponAndArmour(List<Hero> heroes, MonstersAndHeroesPlayer monstersAndHeroesPlayer) {
         BattleStrategy equipStrategy = new EquipStrategy();
         for (Hero hero : heroes) {
             equipStrategy.executeStrategy(monstersAndHeroesPlayer, hero, null);

@@ -137,9 +137,7 @@ public abstract class Hero {
 
             // Check all teleportation conditions
             if (newX >= targetX && // Not ahead of target hero
-                    targetPiece.isAccessible() && // No// heroes
-                    board[targetX][targetY - 1].getGamePieces().stream()
-                            .noneMatch(piece -> piece.getName().startsWith("M"))) { // Not behind monsters
+                    targetPiece.isAccessible()) { // Not behind monsters
                 validPositions.add(new int[]{newX, newY});
             }
         }
@@ -203,7 +201,7 @@ public abstract class Hero {
     public void endOfRoundRecovery() {
         this.HP = Math.min(maxHP, (int) (this.HP * 1.1));
         this.MP = Math.min(maxMana, (int) (this.MP * 1.1));
-        System.out.println(name + " has recovered HP and MP.");
+        System.out.println("\n" + name + " has recovered HP and MP.");
     }
 
     // Respawn after death

@@ -1,11 +1,11 @@
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
 //The main class that starts a Legends of Valor Game, managing gameplay elements and interactions between Heroes and Monsters within the game.
 public class LegendsOfValor extends MonstersAndHeroes {
 
-    private MonstersAndHeroesPlayer monstersAndHeroesPlayer;
     private int boardLength = 8;
     private int rounds = 0;
     private List<Hero> chosenHeroList = new ArrayList<>();
@@ -153,7 +153,7 @@ public class LegendsOfValor extends MonstersAndHeroes {
             } else if (userResponse.equalsIgnoreCase("i")) {
                 System.out.println("Hero Information: ");
                 monstersAndHeroesPlayer.displayHeroesInTableFormat();
-                break;
+                displayMenu();
                 // Enter the Market!
             } else if (userResponse.equalsIgnoreCase("m")) {
                 System.out.println("Attempting to enter a market.\n");
@@ -200,10 +200,12 @@ public class LegendsOfValor extends MonstersAndHeroes {
                 displayMenu();
                 // Potentially consume potions
             } else if (userResponse.equalsIgnoreCase("p")) {
-                potentiallyConsumePotions();
+                List<Hero> heroes = new ArrayList<>(Arrays.asList(hero));
+                potentiallyConsumePotions(heroes, monstersAndHeroesPlayer);
                 break;
             } else if (userResponse.equalsIgnoreCase("e")) {
-                equipWeaponAndArmour(monstersAndHeroesPlayer);
+                List<Hero> heroes = new ArrayList<>(Arrays.asList(hero));
+                equipWeaponAndArmour(heroes, monstersAndHeroesPlayer);
                 break;
             } else {
                 System.out.println("Please enter a valid response.");
@@ -273,7 +275,8 @@ public class LegendsOfValor extends MonstersAndHeroes {
                 ((newBoardPiece.getFirstGamePiece() != null)
                         && ((newBoardPiece.getFirstGamePiece().getName().equals("H1")) ||
                                 (newBoardPiece.getFirstGamePiece().getName().equals("H2"))
-                                || (newBoardPiece.getFirstGamePiece().getName().equals("H3"))))) {
+                                || (newBoardPiece.getFirstGamePiece().getName().equals("H3")))) ||
+                ((newBoardPiece.getFirstGamePiece() != null) && (newBoardPiece.getGamePieces().size() == 2))) {
             return -1;
         }
 
@@ -294,7 +297,8 @@ public class LegendsOfValor extends MonstersAndHeroes {
         // If we enter this, we know we can not move the monster at the moment (Ex. We
         // have an obstacle or another Monster)
         if ((newBoardPiece.getType() == BoardPieceType.OBSTACLE) || ((newBoardPiece.getFirstGamePiece() != null)
-                && (newBoardPiece.getFirstGamePiece().getName().equals("M")))) {
+                && (newBoardPiece.getFirstGamePiece().getName().equals("M"))) ||((newBoardPiece.getFirstGamePiece() != null)
+                && (newBoardPiece.getGamePieces().size() == 2)) )  {
             return;
         }
 
