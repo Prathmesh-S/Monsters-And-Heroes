@@ -56,15 +56,17 @@ public abstract class Hero {
     }
 
     public void applyTerrainBonus() {
-        resetTerrainBonus(); // Clear existing bonuses
         switch (terrainType) {
-            case "Bush":
+            case "B":
+                System.out.println("\nYour hero has entered a bush and has received extra dexterity.");
                 this.dexterity *= 1.1;
                 break;
-            case "Cave":
+            case "C":
+                System.out.println("\nYour hero has entered a cave and has received extra agility.");
                 this.agility *= 1.1;
                 break;
-            case "Koulou":
+            case "K":
+                System.out.println("\nYour hero has entered a koulou and has received extra strength.");
                 this.strength *= 1.1;
                 break;
             default:
@@ -74,13 +76,16 @@ public abstract class Hero {
 
     public void resetTerrainBonus() {
         switch (terrainType) {
-            case "Bush":
+            case "B":
+                System.out.println("\nYour hero has left a bush and has lost its extra dexterity.");
                 this.dexterity /= 1.1;
                 break;
-            case "Cave":
+            case "C":
+                System.out.println("\nYour hero has left a cave and has lost its extra agility.");
                 this.agility /= 1.1;
                 break;
-            case "Koulou":
+            case "K":
+                System.out.println("\nYour hero has left a koulou and has lost its extra strength.");
                 this.strength /= 1.1;
                 break;
             default:

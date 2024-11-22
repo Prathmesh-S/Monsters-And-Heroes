@@ -370,14 +370,22 @@ public class LegendsOfValor extends MonstersAndHeroes {
 
     // Moves the player into a correct boxID
     public void moveHero(Hero hero, int newPlayerBoxID) {
+        hero.resetTerrainBonus();
         int currentBoxID = getBoxIDOfHero(hero);
         BoardPiece currentBoardPiece = getBoardPieceFromID(currentBoxID);
+        BoardPiece newBoardPiece = getBoardPieceFromID(newPlayerBoxID);
         putGamePieceOnBoardPiece(getHeroGamePiece(currentBoardPiece), newPlayerBoxID);
         removeSpecificGamePieceOnBoardPiece(getHeroGamePiece(currentBoardPiece), currentBoardPiece);
         int newRow = (newPlayerBoxID - 1) / boardLength;
         int newColumn = (newPlayerBoxID - 1) % boardLength;
         hero.setCurrentX(newRow);
         hero.setCurrentY(newColumn);
+        if (newBoardPiece.getLabel() != null) {
+            hero.setTerrainType(newBoardPiece.getLabel());
+            hero.applyTerrainBonus();
+        } else {
+            hero.setTerrainType("");
+        }
     }
 
     public static GamePiece getHeroGamePiece(BoardPiece currentBoardPiece) {
