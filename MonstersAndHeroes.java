@@ -176,7 +176,7 @@ public class MonstersAndHeroes extends BoardGame {
                 int currentTile = monstersAndHeroesPlayer.getCurrentBoxID();
                 BoardPiece currentPiece = getBoardPieceFromID(currentTile);
                 if (currentPiece instanceof MarketBoardTile) {
-                    ((MarketBoardTile) currentPiece).enterMarket((MarketBoardTile) currentPiece, monstersAndHeroesPlayer);
+                    ((MarketBoardTile) currentPiece).enterMarket((MarketBoardTile) currentPiece, monstersAndHeroesPlayer, monstersAndHeroesPlayer.getHeroes());
                     break;
                 } else {
                     System.out.println("You are not in a Market Right Now! Select another option.");

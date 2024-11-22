@@ -157,11 +157,12 @@ public class LegendsOfValor extends MonstersAndHeroes {
                 // Enter the Market!
             } else if (userResponse.equalsIgnoreCase("m")) {
                 System.out.println("Attempting to enter a market.\n");
-                int currentTile = monstersAndHeroesPlayer.getCurrentBoxID();
+                int currentTile = getBoxIDOfHero(hero);
                 BoardPiece currentPiece = getBoardPieceFromID(currentTile);
                 if (currentPiece instanceof MarketBoardTile) {
+                    List<Hero> heroes = new ArrayList<>(Arrays.asList(hero));
                     ((MarketBoardTile) currentPiece).enterMarket((MarketBoardTile) currentPiece,
-                            monstersAndHeroesPlayer);
+                            monstersAndHeroesPlayer, heroes);
                     break;
                 } else {
                     System.out.println("You are not in a Market Right Now! Select another option.");

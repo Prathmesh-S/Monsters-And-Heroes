@@ -22,11 +22,11 @@ public class MarketBoardTile extends BoardPiece {
     }
 
     //Market Functionality
-    public void enterMarket(BoardPiece currentPiece, MonstersAndHeroesPlayer monstersAndHeroesPlayer) {
+    public void enterMarket(BoardPiece currentPiece, MonstersAndHeroesPlayer monstersAndHeroesPlayer, List<Hero> heroes) {
         System.out.println("\nWelcome to the Market! Below are things you can buy!\n");
         List<Item> marketItems = ((MarketBoardTile) currentPiece).getItems();
 
-        for (Hero hero : monstersAndHeroesPlayer.getHeroes()) {
+        for (Hero hero : heroes) {
 
             //Allow hero to buy
             System.out.println("\n\033[0;31mTime to Buy!" + "\n\033[0m");
