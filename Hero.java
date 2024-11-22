@@ -38,8 +38,8 @@ public abstract class Hero {
     }
 
     public Hero(String name, int level, int experiencePoints, int mp, int hp, int strength, int dexterity, int agility,
-            double baseDefense,
-            int gold) {
+                double baseDefense,
+                int gold) {
         this.name = name;
         this.level = level;
         this.experiencePoints = experiencePoints;
@@ -110,15 +110,15 @@ public abstract class Hero {
 
         // Ensure teleportation is between different lanes
         if (Math.abs(targetY - this.getCurrentY()) <= 1) {
-            System.out.println("Teleport not allowed: Must teleport to a different lane.");
+            System.out.println("\nTeleport not allowed: Must teleport to a different lane.");
             return false;
         }
 
         // Collect possible adjacent positions in the target lane
         BoardPiece[][] board = game.getBoard();
         List<int[]> validPositions = new ArrayList<>();
-        int[][] directions = { { -1, 0 }, { 1, 0 }, { 0, -1 }, { 0, 1 } }; // Adjacent directions: North, South,
-                                                                           // West,East
+        int[][] directions = {{1, 0}, {0, -1}, {0, 1}}; // Adjacent directions: North, South,
+        // West,East
         for (int[] dir : directions) {
             int newX = targetX + dir[0];
             int newY = targetY + dir[1];
@@ -130,23 +130,26 @@ public abstract class Hero {
 
             BoardPiece targetPiece = board[newX][newY];
 
+            //Continue if a hero exists in the space
+            if ((targetPiece.getGamePieces() != null) && (targetPiece.getGamePieces().stream().anyMatch(piece -> piece.getName().startsWith("H")))) {
+                continue;
+            }
+
             // Check all teleportation conditions
             if (newX >= targetX && // Not ahead of target hero
-                    targetPiece.isAccessible() && // Space is accessible
-                    targetPiece.getGamePieces().stream().noneMatch(piece -> piece.getName().startsWith("H")) && // No
-                                                                                                                // heroes
+                    targetPiece.isAccessible() && // No// heroes
                     board[targetX][targetY - 1].getGamePieces().stream()
                             .noneMatch(piece -> piece.getName().startsWith("M"))) { // Not behind monsters
-                validPositions.add(new int[] { newX, newY });
+                validPositions.add(new int[]{newX, newY});
             }
         }
         // Abort if no valid positions
         if (validPositions.isEmpty()) {
-            System.out.println("Teleport failed: No valid positions adjacent to the target hero.");
+            System.out.println("\nTeleport failed: No valid positions adjacent to the target hero.");
             return false;
         }
         // Display options to the user
-        System.out.println("Select a position to teleport to:");
+        System.out.println("\nSelect a position to teleport to (Row, Column), using zero-indexing:");
         for (int i = 0; i < validPositions.size(); i++) {
             int[] pos = validPositions.get(i);
             System.out.printf("%d: (%d, %d)%n", i + 1, pos[0], pos[1]);
@@ -156,7 +159,7 @@ public abstract class Hero {
         int choice = scanner.nextInt() - 1;
         // Validate choice
         if (choice < 0 || choice >= validPositions.size()) {
-            System.out.println("Invalid choice. Teleport canceled.");
+            System.out.println("\nInvalid choice. Teleport canceled.");
             return false;
         }
         // Perform teleport
