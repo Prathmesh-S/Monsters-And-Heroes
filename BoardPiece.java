@@ -105,7 +105,9 @@ public class BoardPiece {
                 this.isAccessible = false;
                 break;
             default:
-                this.label = "";
+                this.label = null;
+                isLabled = false;
+                this.isAccessible = true;
                 break;
         }
     }

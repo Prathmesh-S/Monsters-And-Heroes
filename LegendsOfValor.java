@@ -150,7 +150,11 @@ public class LegendsOfValor extends MonstersAndHeroes {
                 System.out.println("The program has quit. Thank you for playing!");
                 System.exit(0);
                 // Show Game Information
-            } else if (userResponse.equalsIgnoreCase("i")) {
+            } else if (userResponse.equalsIgnoreCase("ro")) {
+                removeObstacle();
+                break;
+            }
+            else if (userResponse.equalsIgnoreCase("i")) {
                 System.out.println("Hero Information: ");
                 monstersAndHeroesPlayer.displayHeroesInTableFormat();
                 displayMenu();
@@ -223,9 +227,47 @@ public class LegendsOfValor extends MonstersAndHeroes {
         System.out.println("P: Consume a Potion");
         System.out.println("E: Equip Weapons or Armor");
         System.out.println("R: Recall to Nexus");
+        System.out.println("RO: Remove Obstacle (The O's on the map)");
         System.out.println("T: Teleport to Another Hero");
         System.out.println("MAP: Display the Game Map Again");
         System.out.println("\nEnter your choice: ");
+    }
+
+    public void removeObstacle() {
+        BoardPiece [][] board = getBoard();
+        List <BoardPiece> obstaclePieces = new ArrayList<>();
+
+        //Add all obstacle pieces
+        for (int i = 0; i < board.length; i++) {
+            for (int j = 0; j < board[i].length; j++) {
+                if (board[i][j].getType() == BoardPieceType.OBSTACLE) {
+                    obstaclePieces.add(board[i][j]);
+                }
+            }
+        }
+
+        if (obstaclePieces.isEmpty()) {
+            System.out.println("\nThere are no obstacles to remove! You have wasted a turn!");
+            return;
+        }
+
+        // Display options to the user
+        System.out.println("\nSelect an obstacle to remove with coordinates (Row, Column), using zero-indexing:");
+        for (int i = 0; i < obstaclePieces.size(); i++) {
+            int boardPieceID = obstaclePieces.get(i).getID();
+            int row = (boardPieceID - 1) / boardLength, col = (boardPieceID - 1) % boardLength;
+            System.out.printf("%d: (%d, %d)%n", i, row, col);
+        }
+
+        //Collect User Response for obstacle they want to remove
+        int obstaclePieceID = getNumberResponse(0, obstaclePieces.size()-1, "index of the obstacle piece you would like to remove",
+                "Invalid Index ", "Invalid Index ", "Please enter a valid index. ");
+
+        BoardPiece chosenPiece = obstaclePieces.get(obstaclePieceID);
+
+        chosenPiece.setType(BoardPieceType.PLAIN);
+        System.out.println("\nThe obstacle has been removed!");
+
     }
 
     public int getBoxIDOfHero(Hero hero) {
