@@ -108,17 +108,17 @@ public abstract class Hero {
         int targetX = targetHero.getCurrentX();
         int targetY = targetHero.getCurrentY();
 
-        // Check if teleporting to the same lane
+        // Ensure teleportation is between different lanes
         if (Math.abs(targetY - this.getCurrentY()) <= 1) {
             System.out.println("Teleport not allowed: Must teleport to a different lane.");
             return false;
         }
 
-        // Define possible adjacent spaces
-        int[][] directions = { { -1, 0 }, { 1, 0 }, { 0, -1 }, { 0, 1 } }; // North, South, West, East
-
-        // Iterate over possible spaces around the target hero
+        // Collect possible adjacent positions in the target lane
         BoardPiece[][] board = game.getBoard();
+        List<int[]> validPositions = new ArrayList<>();
+        int[][] directions = { { -1, 0 }, { 1, 0 }, { 0, -1 }, { 0, 1 } }; // Adjacent directions: North, South,
+                                                                           // West,East
         for (int[] dir : directions) {
             int newX = targetX + dir[0];
             int newY = targetY + dir[1];
@@ -130,27 +130,53 @@ public abstract class Hero {
 
             BoardPiece targetPiece = board[newX][newY];
 
-            // Ensure the space is accessible
-            if (targetPiece == null || !targetPiece.isAccessible()) {
-                continue;
+            // Check all teleportation conditions
+            if (newX >= targetX && // Not ahead of target hero
+                    targetPiece.isAccessible() && // Space is accessible
+                    targetPiece.getGamePieces().stream().noneMatch(piece -> piece.getName().startsWith("H")) && // No
+                                                                                                                // heroes
+                    board[targetX][targetY - 1].getGamePieces().stream()
+                            .noneMatch(piece -> piece.getName().startsWith("M"))) { // Not behind monsters
+                validPositions.add(new int[] { newX, newY });
             }
-            BoardPiece currentPiece = board[this.getCurrentX()][this.getCurrentY()];
-            currentPiece.getGamePieces().removeIf(piece -> piece.getName().equals(this.getIdentifier()));
-            // identifier
-            targetPiece.addGamePiece(new GamePiece(this.getIdentifier(), "\u001B[1m\u001B[92m")); // Use identifier
-
-            // Update hero position
-            this.setCurrentX(newX);
-            this.setCurrentY(newY);
-            this.setTerrainType(targetPiece.getType().name()); // Set terrain type based on the board piece
-            applyTerrainBonus();
-
-            System.out.println(this.getIdentifier() + " successfully teleported to (" + newX + ", " + newY + ").");
-
-            return true;
         }
-        System.out.println("Teleport failed: No valid space adjacent to the target hero.");
-        return false;
+        // Abort if no valid positions
+        if (validPositions.isEmpty()) {
+            System.out.println("Teleport failed: No valid positions adjacent to the target hero.");
+            return false;
+        }
+        // Display options to the user
+        System.out.println("Select a position to teleport to:");
+        for (int i = 0; i < validPositions.size(); i++) {
+            int[] pos = validPositions.get(i);
+            System.out.printf("%d: (%d, %d)%n", i + 1, pos[0], pos[1]);
+        }
+        // Get user choice
+        Scanner scanner = new Scanner(System.in);
+        int choice = scanner.nextInt() - 1;
+        // Validate choice
+        if (choice < 0 || choice >= validPositions.size()) {
+            System.out.println("Invalid choice. Teleport canceled.");
+            return false;
+        }
+        // Perform teleport
+        int[] selectedPosition = validPositions.get(choice);
+        int newX = selectedPosition[0];
+        int newY = selectedPosition[1];
+
+        BoardPiece currentPiece = board[this.getCurrentX()][this.getCurrentY()];
+        currentPiece.getGamePieces().removeIf(piece -> piece.getName().equals(this.getIdentifier())); // Remove hero
+
+        BoardPiece targetPiece = board[newX][newY];
+        targetPiece.addGamePiece(new GamePiece(this.getIdentifier(), "\u001B[1m\u001B[92m")); // Add hero
+
+        this.setCurrentX(newX);
+        this.setCurrentY(newY);
+        this.setTerrainType(targetPiece.getType().name()); // Update terrain type
+        applyTerrainBonus();
+
+        System.out.printf("%s successfully teleported to (%d, %d).%n", this.getIdentifier(), newX, newY);
+        return true;
     }
 
     // Recall action
