@@ -42,7 +42,7 @@ public class MarketBoardTile extends BoardPiece {
             marketSelling(monstersAndHeroesPlayer, hero, marketItems);
         }
 
-        System.out.println("\n\n Now leaving the market!\n");
+        System.out.println("\n\nNow leaving the market!\n");
     }
 
     public void marketBuying(MonstersAndHeroesPlayer monstersAndHeroesPlayer, Hero hero, List<Item> marketItems, BoardPiece currentPiece) {

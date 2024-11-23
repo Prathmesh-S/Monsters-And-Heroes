@@ -155,11 +155,12 @@ public abstract class Hero {
         System.out.println("\nSelect a position to teleport to (Row, Column), using zero-indexing:");
         for (int i = 0; i < validPositions.size(); i++) {
             int[] pos = validPositions.get(i);
-            System.out.printf("%d: (%d, %d)%n", i + 1, pos[0], pos[1]);
+            System.out.printf("%d: (%d, %d)%n", i, pos[0], pos[1]);
         }
         // Get user choice
         Scanner scanner = new Scanner(System.in);
-        int choice = scanner.nextInt() - 1;
+        int choice = BoardGame.getNumberResponse(0, validPositions.size() - 1, "index of the position you would like to teleport to.",
+                "Invalid Index ", "Invalid Index ", "Please enter a valid index. ");
         // Validate choice
         if (choice < 0 || choice >= validPositions.size()) {
             System.out.println("\nInvalid choice. Teleport canceled.");

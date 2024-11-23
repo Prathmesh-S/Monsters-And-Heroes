@@ -1,7 +1,4 @@
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 //The main class that starts a Legends of Valor Game, managing gameplay elements and interactions between Heroes and Monsters within the game.
 public class LegendsOfValor extends MonstersAndHeroes {
@@ -153,13 +150,40 @@ public class LegendsOfValor extends MonstersAndHeroes {
             } else if (userResponse.equalsIgnoreCase("ro")) {
                 removeObstacle();
                 break;
-            }
-            else if (userResponse.equalsIgnoreCase("i")) {
+            } else if (userResponse.equalsIgnoreCase("i")) {
                 System.out.println("Hero Information: ");
                 monstersAndHeroesPlayer.displayHeroesInTableFormat();
                 displayMenu();
-                // Enter the Market!
-            } else if (userResponse.equalsIgnoreCase("m")) {
+            } else if (userResponse.equalsIgnoreCase("attack")) {
+                Monster monster = potentiallyAttackMonster(hero);
+                //We have a monster
+                if (monster != null) {
+                    BattleStrategy attack = new AttackStrategy();
+                    attack.executeStrategy(monstersAndHeroesPlayer, hero, monster);
+                    //Check if monster has died
+                    if (!monster.isAlive()) {
+                        GamePiece monsterPiece = LegendsOfValor.getMonsterGamePiece(getBoardPieceFromID(monster.getCurrentX() * boardLength + monster.getCurrentY() + 1));
+                        BoardGame.removeSpecificGamePieceOnBoardPiece(monsterPiece, getBoardPieceFromID(getBoxIDOfHero(hero)));
+                        chosenMonsterList.remove(monster);
+                    }
+                }
+                break;
+            } else if (userResponse.equalsIgnoreCase("spell")) {
+                Monster monster = potentiallyAttackMonster(hero);
+                //We have a monster
+                if (monster != null) {
+                    BattleStrategy spellStrategy = new SpellStrategy();
+                    spellStrategy.executeStrategy(monstersAndHeroesPlayer, hero, monster);
+                    //Check if monster has died
+                    if (!monster.isAlive()) {
+                        GamePiece monsterPiece = LegendsOfValor.getMonsterGamePiece(getBoardPieceFromID(monster.getCurrentX() * boardLength + monster.getCurrentY() + 1));
+                        BoardGame.removeSpecificGamePieceOnBoardPiece(monsterPiece, getBoardPieceFromID(getBoxIDOfHero(hero)));
+                        chosenMonsterList.remove(monster);
+                    }
+                }
+                break;
+            }
+            else if (userResponse.equalsIgnoreCase("m")) {
                 System.out.println("Attempting to enter a market.\n");
                 int currentTile = getBoxIDOfHero(hero);
                 BoardPiece currentPiece = getBoardPieceFromID(currentTile);
@@ -167,7 +191,7 @@ public class LegendsOfValor extends MonstersAndHeroes {
                     List<Hero> heroes = new ArrayList<>(Arrays.asList(hero));
                     ((MarketBoardTile) currentPiece).enterMarket((MarketBoardTile) currentPiece,
                             monstersAndHeroesPlayer, heroes);
-                    break;
+                    displayMenu();
                 } else {
                     System.out.println("You are not in a Market Right Now! Select another option.");
                 }
@@ -184,10 +208,11 @@ public class LegendsOfValor extends MonstersAndHeroes {
                 System.out.println("Select a hero to teleport to:");
                 for (int i = 0; i < chosenHeroList.size(); i++) {
                     Hero targetHero = chosenHeroList.get(i);
-                    System.out.println((i + 1) + ": " + targetHero.getName() + " at (" + targetHero.getCurrentX() + ", "
+                    System.out.println((i) + ": " + targetHero.getName() + " at (" + targetHero.getCurrentX() + ", "
                             + targetHero.getCurrentY() + ")");
                 }
-                int choice = scanner.nextInt() - 1;
+                int choice = BoardGame.getNumberResponse(0, chosenHeroList.size() - 1, "index of the hero you would like to teleport to.",
+                        "Invalid Index ", "Invalid Index ", "Please enter a valid index. ");
 
                 if (choice >= 0 && choice < chosenHeroList.size()) {
                     Hero targetHero = chosenHeroList.get(choice);
@@ -227,6 +252,8 @@ public class LegendsOfValor extends MonstersAndHeroes {
         System.out.println("P: Consume a Potion");
         System.out.println("E: Equip Weapons or Armor");
         System.out.println("R: Recall to Nexus");
+        System.out.println("Attack: Attack a Monster near you!");
+        System.out.println("Spell: Spell a Monster near you!");
         System.out.println("RO: Remove Obstacle (The O's on the map)");
         System.out.println("T: Teleport to Another Hero");
         System.out.println("MAP: Display the Game Map Again");
@@ -234,8 +261,8 @@ public class LegendsOfValor extends MonstersAndHeroes {
     }
 
     public void removeObstacle() {
-        BoardPiece [][] board = getBoard();
-        List <BoardPiece> obstaclePieces = new ArrayList<>();
+        BoardPiece[][] board = getBoard();
+        List<BoardPiece> obstaclePieces = new ArrayList<>();
 
         //Add all obstacle pieces
         for (int i = 0; i < board.length; i++) {
@@ -260,7 +287,7 @@ public class LegendsOfValor extends MonstersAndHeroes {
         }
 
         //Collect User Response for obstacle they want to remove
-        int obstaclePieceID = getNumberResponse(0, obstaclePieces.size()-1, "index of the obstacle piece you would like to remove",
+        int obstaclePieceID = getNumberResponse(0, obstaclePieces.size() - 1, "index of the obstacle piece you would like to remove",
                 "Invalid Index ", "Invalid Index ", "Please enter a valid index. ");
 
         BoardPiece chosenPiece = obstaclePieces.get(obstaclePieceID);
@@ -272,6 +299,70 @@ public class LegendsOfValor extends MonstersAndHeroes {
 
     public int getBoxIDOfHero(Hero hero) {
         return (hero.getCurrentX() * boardLength + hero.getCurrentY() + 1);
+    }
+
+    public Monster potentiallyAttackMonster(Hero hero) {
+        int heroX = hero.getCurrentX();
+        int heroY = hero.getCurrentY();
+
+        // Collect possible adjacent positions in the target lane
+        BoardPiece[][] board = this.getBoard();
+        List<int[]> validPositions = new ArrayList<>();
+        int[][] directions = {{0, 0}, {0, -1}, {0, 1}, {-1, 0}, {-1, -1}, {-1, 1}, {1, 0}, {1, -1}, {1, 1}}; // Adjacent directions: North, South,
+
+        for (int[] dir : directions) {
+            int newX = heroX + dir[0];
+            int newY = heroY + dir[1];
+
+            // Check board boundaries
+            if (newX < 0 || newX >= board.length || newY < 0 || newY >= board[0].length) {
+                continue;
+            }
+
+            BoardPiece targetPiece = board[newX][newY];
+
+            //Add all monster pieces
+            if ((targetPiece.getGamePieces() != null) && (targetPiece.getGamePieces().stream().anyMatch(piece -> piece.getName().startsWith("M")))) {
+                validPositions.add(new int[]{newX, newY});
+            }
+        }
+
+        // Abort if no valid positions
+        if (validPositions.isEmpty()) {
+            System.out.println("\nAttack failed: No monsters to attack/spell in your area!.");
+            return null;
+        }
+
+        // Display options to the user
+        System.out.println("\nSelect a monster position to attack/spell (Row, Column), using zero-indexing:");
+        for (int i = 0; i < validPositions.size(); i++) {
+            int[] pos = validPositions.get(i);
+            System.out.printf("%d: (%d, %d)%n", i, pos[0], pos[1]);
+        }
+
+        // Get user choice
+        int choice = getNumberResponse(0, validPositions.size() - 1, "index of the monster you would like to attack",
+                "Invalid Index ", "Invalid Index ", "Please enter a valid index. ");
+        // Validate choice
+        if (choice < 0 || choice >= validPositions.size()) {
+            System.out.println("\nInvalid choice. Monster attack failed as you attacked no one!.");
+            return null;
+        }
+
+        int[] selectedPosition = validPositions.get(choice);
+        int monsterRow = selectedPosition[0];
+        int monsterCol = selectedPosition[1];
+        Monster chosenMonster = null;
+
+        //Find the monster
+        for (Monster monster : chosenMonsterList) {
+            if ((monster.getCurrentX() == monsterRow) && (monster.getCurrentY() == monsterCol)) {
+                chosenMonster = monster;
+            }
+        }
+
+        return chosenMonster;
+
     }
 
     // Gets new tile location for W/A/S/D commands
@@ -317,8 +408,8 @@ public class LegendsOfValor extends MonstersAndHeroes {
                 || (newBoardPiece.getType() == BoardPieceType.OBSTACLE) ||
                 ((newBoardPiece.getFirstGamePiece() != null)
                         && ((newBoardPiece.getFirstGamePiece().getName().equals("H1")) ||
-                                (newBoardPiece.getFirstGamePiece().getName().equals("H2"))
-                                || (newBoardPiece.getFirstGamePiece().getName().equals("H3")))) ||
+                        (newBoardPiece.getFirstGamePiece().getName().equals("H2"))
+                        || (newBoardPiece.getFirstGamePiece().getName().equals("H3")))) ||
                 ((newBoardPiece.getFirstGamePiece() != null) && (newBoardPiece.getGamePieces().size() == 2))) {
             return -1;
         }
@@ -340,8 +431,8 @@ public class LegendsOfValor extends MonstersAndHeroes {
         // If we enter this, we know we can not move the monster at the moment (Ex. We
         // have an obstacle or another Monster)
         if ((newBoardPiece.getType() == BoardPieceType.OBSTACLE) || ((newBoardPiece.getFirstGamePiece() != null)
-                && (newBoardPiece.getFirstGamePiece().getName().equals("M"))) ||((newBoardPiece.getFirstGamePiece() != null)
-                && (newBoardPiece.getGamePieces().size() == 2)) )  {
+                && (newBoardPiece.getFirstGamePiece().getName().equals("M"))) || ((newBoardPiece.getFirstGamePiece() != null)
+                && (newBoardPiece.getGamePieces().size() == 2))) {
             return;
         }
 
