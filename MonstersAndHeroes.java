@@ -5,12 +5,15 @@ public class MonstersAndHeroes extends BoardGame {
 
     private int boardLength;
     private int numHeroes;
-    private MonstersAndHeroesPlayer monstersAndHeroesPlayer;
+    protected MonstersAndHeroesPlayer monstersAndHeroesPlayer;
     private Team monstersAndHeroesTeam;
 
     public MonstersAndHeroes(List<Player> players) {
         super("Monsters And Heroes (Single-Player)", players);
+    }
 
+    public MonstersAndHeroes(String name, List<Player> players) {
+        super(name, players);
     }
 
     @Override
@@ -35,7 +38,7 @@ public class MonstersAndHeroes extends BoardGame {
 
         //Create our Specific Player/Heroes and place on the map
         Player generalPlayer = getPlayers().get(0);
-        monstersAndHeroesPlayer = new MonstersAndHeroesPlayer(generalPlayer.getName(),chosenHeroList);
+        monstersAndHeroesPlayer = new MonstersAndHeroesPlayer(generalPlayer.getName(), chosenHeroList);
         monstersAndHeroesPlayer.setCurrentBoxID(1);
         GamePiece monstersAndHeroesPlayerGamePiece = new GamePiece("YOU", "\u001B[92m");
         monstersAndHeroesTeam = new Team(monstersAndHeroesPlayer.getName(), Arrays.asList(monstersAndHeroesPlayerGamePiece));
@@ -85,7 +88,7 @@ public class MonstersAndHeroes extends BoardGame {
     //Create and return a string representing our 2D board and its state
     public String printBoard() {
 
-        BoardPiece [][] board = getBoard();
+        BoardPiece[][] board = getBoard();
 
         StringBuilder sb = new StringBuilder();
         sb.append("\n");
@@ -108,20 +111,30 @@ public class MonstersAndHeroes extends BoardGame {
             String boxText;
             String colorCode;
             if (board[i][j].getFirstGamePiece() != null) {
-                boxText = board[i][j].getFirstGamePiece().getName();
+
+                //Check to see if multiple gamePieces exist:
+                List<GamePiece> gamePieces = board[i][j].getGamePieces();
+                if (gamePieces.size() == 2) {
+                    boxText = gamePieces.get(0).getColorCode() + gamePieces.get(0).getName() + ANSI_RESET + "," + gamePieces.get(1).getColorCode() + gamePieces.get(1).getName();
+                } else {
+                    boxText = board[i][j].getFirstGamePiece().getName();
+                }
+
                 colorCode = board[i][j].getFirstGamePiece().getColorCode();
             } else {
                 if (board[i][j].isLabled()) {
                     boxText = board[i][j].getLabel();
                 } else {
-                    boxText = "   ";
-                }
-                if (boxText.length() == 1) {
-                    boxText = "  " + boxText;
-                } else if (boxText.length() == 2) {
-                    boxText = " " + boxText;
+                    boxText = "    ";
                 }
                 colorCode = board[i][j].getColorCode();
+            }
+            if (boxText.length() == 1) {
+                boxText = "   " + boxText;
+            } else if (boxText.length() == 2) {
+                boxText = "  " + boxText;
+            } else if (boxText.length() == 3) {
+                boxText = " " + boxText;
             }
             sb.append("[").append(colorCode).append(boxText).append(ANSI_RESET).append("] ");
         }
@@ -146,7 +159,7 @@ public class MonstersAndHeroes extends BoardGame {
                     }
                     break;
                 } else {
-                    System.out.println("Please enter a valid response.");
+                    System.out.println("Please enter a valid response and ensure your hero is moving following all game rules!.");
                 }
                 // Quit the Game
             } else if (userResponse.equalsIgnoreCase("q")) {
@@ -163,7 +176,7 @@ public class MonstersAndHeroes extends BoardGame {
                 int currentTile = monstersAndHeroesPlayer.getCurrentBoxID();
                 BoardPiece currentPiece = getBoardPieceFromID(currentTile);
                 if (currentPiece instanceof MarketBoardTile) {
-                    ((MarketBoardTile) currentPiece).enterMarket((MarketBoardTile) currentPiece, monstersAndHeroesPlayer);
+                    ((MarketBoardTile) currentPiece).enterMarket((MarketBoardTile) currentPiece, monstersAndHeroesPlayer, monstersAndHeroesPlayer.getHeroes());
                     break;
                 } else {
                     System.out.println("You are not in a Market Right Now! Select another option.");
@@ -173,10 +186,12 @@ public class MonstersAndHeroes extends BoardGame {
                 System.out.println("\nPlease Select an Option: (W , A , S , D , Q (quit), I (information) , M (market), P (Consume Potion), E (Equip), MAP) and hit enter. \n");
                 //Potentially consume potions
             } else if (userResponse.equalsIgnoreCase("p")) {
-                potentiallyConsumePotions();
+                List<Hero> heroes = monstersAndHeroesPlayer.getHeroes();
+                potentiallyConsumePotions(heroes, monstersAndHeroesPlayer);
                 break;
             } else if (userResponse.equalsIgnoreCase("e")) {
-                equipWeaponAndArmour(monstersAndHeroesPlayer);
+                List<Hero> heroes = monstersAndHeroesPlayer.getHeroes();
+                equipWeaponAndArmour(heroes, monstersAndHeroesPlayer);
                 break;
             } else {
                 System.out.println("Please enter a valid response.");
@@ -184,16 +199,14 @@ public class MonstersAndHeroes extends BoardGame {
         }
     }
 
-    public void potentiallyConsumePotions() {
-        List<Hero> heroes = monstersAndHeroesPlayer.getHeroes();
+    public void potentiallyConsumePotions(List<Hero> heroes, MonstersAndHeroesPlayer monstersAndHeroesPlayer) {
         BattleStrategy potionStrategy = new PotionStrategy();
         for (Hero hero : heroes) {
             potionStrategy.executeStrategy(monstersAndHeroesPlayer, hero, null);
         }
     }
 
-    public void equipWeaponAndArmour(MonstersAndHeroesPlayer monstersAndHeroesPlayer) {
-        List<Hero> heroes = monstersAndHeroesPlayer.getHeroes();
+    public void equipWeaponAndArmour(List<Hero> heroes, MonstersAndHeroesPlayer monstersAndHeroesPlayer) {
         BattleStrategy equipStrategy = new EquipStrategy();
         for (Hero hero : heroes) {
             equipStrategy.executeStrategy(monstersAndHeroesPlayer, hero, null);
@@ -268,8 +281,8 @@ public class MonstersAndHeroes extends BoardGame {
         while (numHeroes > 0) {
             System.out.println("\nThis is the remaining list of your possible heroes!");
             HeroFactoryManager.displayHeroesInTableFormat(heroes);
-            System.out.println("\nYou must select " +numHeroes + " more heroes. Please choose the index of the next hero you would like to select!");
-            int chosenIndex = BoardGame.getNumberResponse(0, heroes.size() -1, "chosen index of your next hero", "Your index must be ",
+            System.out.println("\nYou must select " + numHeroes + " more heroes. Please choose the index of the next hero you would like to select!");
+            int chosenIndex = BoardGame.getNumberResponse(0, heroes.size() - 1, "chosen index of your next hero", "Your index must be ",
                     "Your index must be ", "Incorrect hero index chosen!");
             newHeroes.add(heroes.get(chosenIndex));
             heroes.remove(chosenIndex);

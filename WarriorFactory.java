@@ -12,7 +12,8 @@ public class WarriorFactory implements HeroFactory {
     @Override
     public Hero createCharacter() {
         String line = Util.getRandomLineFromFile(filePath);
-        if (line == null) return null;
+        if (line == null)
+            return null;
         String[] attributes = line.trim().split("\\s+");
         String name = attributes[0];
         int mp = Integer.parseInt(attributes[1]);
@@ -24,7 +25,9 @@ public class WarriorFactory implements HeroFactory {
         Random random = new Random();
         int level = random.nextInt(5) + 3;
 
-        // Create a new Warrior object. Assuming level starts at 1 and HP is set to 0 initially.
-        return new Warrior(name, level, experiencePoints, mp, level * 100 * 2, strength, dexterity, agility, gold);
+        // Create a new Warrior object. Assuming level starts at 1 and HP is set to 0
+        // initially.
+        return new Warrior(name, level, experiencePoints, mp, level * 100 * 2, strength, dexterity, agility, 10.0,
+                gold);
     }
 }

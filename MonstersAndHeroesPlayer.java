@@ -6,6 +6,7 @@ import java.util.List;
 public class MonstersAndHeroesPlayer extends Player {
     int currentBoxID;
     List<Hero> heroes = new ArrayList<Hero>();
+
     public MonstersAndHeroesPlayer(String name, List<Hero> heroes) {
         super(name);
         this.heroes = heroes;
@@ -15,7 +16,7 @@ public class MonstersAndHeroesPlayer extends Player {
         return currentBoxID;
     }
 
-    public void setCurrentBoxID (int currentBoxID) {
+    public void setCurrentBoxID(int currentBoxID) {
         this.currentBoxID = currentBoxID;
     }
 
@@ -23,7 +24,7 @@ public class MonstersAndHeroesPlayer extends Player {
         return heroes;
     }
 
-    public void displayHeroesInTableFormat(){
+    public void displayHeroesInTableFormat() {
         HeroFactoryManager.displayHeroesInTableFormat(heroes);
     }
 }
