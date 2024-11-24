@@ -73,6 +73,7 @@ public class LegendsOfValor extends MonstersAndHeroes {
             System.out.println("\n--- Round " + rounds + " ---");
 
             // Hero Rounds
+            System.out.println("\u001B[34m------------------------Hero Turn ------------------------\u001B[0m");
             for (Hero hero : chosenHeroList) {
                 if (!hero.isAlive()) {
                     System.out.println(hero.getName() + " is dead and will respawn next round.");
@@ -90,30 +91,41 @@ public class LegendsOfValor extends MonstersAndHeroes {
                     System.exit(0);
                 }
             }
+            System.out.println("\u001B[34m-------------------------------------------------------------\u001B[0m");
 
             // Monster Rounds
-            for (Monster monster : chosenMonsterList) {
+            System.out.println("\u001B[31m------------------------Monsters Turn ------------------------\u001B[0m");
+            List<Monster> tempMonsterList = new ArrayList<>();
+            tempMonsterList.addAll(chosenMonsterList);
+
+            for (Monster monster : tempMonsterList) {
 
                 // Attack a hero if possible.
+                boolean attacked = potentiallyAttackHero(monster);
+                if (!attacked) {
+                    // Move the monster.
+                    moveMonster(monster);
 
-                // Move the monster.
-                moveMonster(monster);
-
-                // Check if monster has reached the heroes' Nexus
-                if (monster.getCurrentX() == 7) {
-                    System.out.println(printBoard());
-                    System.out.println("\n" + monster.getName()
-                            + " has reached the heroes' Nexus! Game Over as monsters have won!.");
-                    System.exit(0);
+                    // Check if monster has reached the heroes' Nexus
+                    if (monster.getCurrentX() == 7) {
+                        System.out.println(printBoard());
+                        System.out.println("\n" + monster.getName()
+                                + " has reached the heroes' Nexus! Game Over as monsters have won!.");
+                        System.exit(0);
+                    }
                 }
             }
+            System.out.println("\u001B[31m-------------------------------------------------------------\u001B[0m");
+
 
             // End-of-round recovery and respawn
             for (Hero hero : chosenHeroList) {
                 if (hero.isAlive()) {
                     hero.endOfRoundRecovery();
                 } else {
-                    hero.respawn(7, hero.getCurrentY());
+                    hero.respawn(hero.getNexusX(), hero.getNexusY());
+                    GamePiece monstersAndHeroesPlayerGamePiece1 = new GamePiece(hero.getIdentifier(), "\u001B[1m\u001B[92m");
+                    putGamePieceOnBoardPiece(monstersAndHeroesPlayerGamePiece1, hero.getNexusX() * boardLength + hero.getNexusY() +1);
                 }
             }
 
@@ -163,7 +175,7 @@ public class LegendsOfValor extends MonstersAndHeroes {
                     //Check if monster has died
                     if (!monster.isAlive()) {
                         GamePiece monsterPiece = LegendsOfValor.getMonsterGamePiece(getBoardPieceFromID(monster.getCurrentX() * boardLength + monster.getCurrentY() + 1));
-                        BoardGame.removeSpecificGamePieceOnBoardPiece(monsterPiece, getBoardPieceFromID(getBoxIDOfHero(hero)));
+                        BoardGame.removeSpecificGamePieceOnBoardPiece(monsterPiece, getBoardPieceFromID(monster.getCurrentX() * boardLength + monster.getCurrentY() + 1));
                         chosenMonsterList.remove(monster);
                     }
                 }
@@ -177,7 +189,7 @@ public class LegendsOfValor extends MonstersAndHeroes {
                     //Check if monster has died
                     if (!monster.isAlive()) {
                         GamePiece monsterPiece = LegendsOfValor.getMonsterGamePiece(getBoardPieceFromID(monster.getCurrentX() * boardLength + monster.getCurrentY() + 1));
-                        BoardGame.removeSpecificGamePieceOnBoardPiece(monsterPiece, getBoardPieceFromID(getBoxIDOfHero(hero)));
+                        BoardGame.removeSpecificGamePieceOnBoardPiece(monsterPiece, getBoardPieceFromID(monster.getCurrentX() * boardLength + monster.getCurrentY() + 1));
                         chosenMonsterList.remove(monster);
                     }
                 }
@@ -365,6 +377,61 @@ public class LegendsOfValor extends MonstersAndHeroes {
 
     }
 
+    public boolean potentiallyAttackHero (Monster monster) {
+        int monsterX = monster.getCurrentX();
+        int monsterY = monster.getCurrentY();
+
+        // Collect possible adjacent positions in the target lane
+        BoardPiece[][] board = this.getBoard();
+        List<int[]> validPositions = new ArrayList<>();
+        int[][] directions = {{0, 0}, {0, -1}, {0, 1}, {-1, 0}, {-1, -1}, {-1, 1}, {1, 0}, {1, -1}, {1, 1}}; // Adjacent directions: North, South,
+
+        for (int[] dir : directions) {
+            int newX = monsterX + dir[0];
+            int newY = monsterY + dir[1];
+
+            // Check board boundaries
+            if (newX < 0 || newX >= board.length || newY < 0 || newY >= board[0].length) {
+                continue;
+            }
+
+            BoardPiece targetPiece = board[newX][newY];
+
+            //Add all monster pieces
+            if ((targetPiece.getGamePieces() != null) && (targetPiece.getGamePieces().stream().anyMatch(piece -> piece.getName().startsWith("H")))) {
+                validPositions.add(new int[]{newX, newY});
+            }
+        }
+
+        // Abort if no valid positions
+        if (validPositions.isEmpty()) {
+            return false;
+        }
+
+        int[] randomHero = validPositions.get(new Random().nextInt(validPositions.size()));
+
+        int heroRow = randomHero [0];
+        int heroCol = randomHero [1];
+        Hero chosenHero = null;
+
+        //Find the Hero
+        for (Hero hero  : chosenHeroList) {
+            if ((hero.getCurrentX() == heroRow) && (hero.getCurrentY() == heroCol)) {
+                chosenHero = hero;
+            }
+        }
+
+        //Attack the hero
+        Battle.monsterAttack(chosenHero, monster);
+
+        //Update Hero if needed (check to see if it died)
+        if (!chosenHero.isAlive()) {
+            GamePiece heroPiece = LegendsOfValor.getHeroGamePiece(getBoardPieceFromID(chosenHero.getCurrentX() * boardLength + chosenHero.getCurrentY() + 1));
+            BoardGame.removeSpecificGamePieceOnBoardPiece(heroPiece, getBoardPieceFromID(getBoxIDOfHero(chosenHero)));
+        }
+        return true;
+    }
+
     // Gets new tile location for W/A/S/D commands
     public Integer getNewTileID(String direction, int currentTileID) {
         int numRows = boardLength, numCols = boardLength;
@@ -451,6 +518,7 @@ public class LegendsOfValor extends MonstersAndHeroes {
         }
 
         // If we pass this, we can move the monster down
+        System.out.println("\nA monster has moved towards your nexus this round!");
         removeSpecificGamePieceOnBoardPiece(getMonsterGamePiece(currentBoardPiece), currentBoardPiece);
         putGamePieceOnBoardPiece(new GamePiece("M", "\u001B[1m\u001B[31m"), newBoxID);
         int newRow = (newBoxID - 1) / boardLength;

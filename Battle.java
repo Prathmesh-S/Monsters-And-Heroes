@@ -138,7 +138,7 @@ public class Battle {
         System.out.println("--------------------------------------------------------------");
     }
 
-    public void monsterAttack(Hero hero, Monster monster) {
+    public static void monsterAttack(Hero hero, Monster monster) {
 
         //Check if the hero has dodged!
         double dodgeChange = hero.getAgility() * 0.02 / 100;
